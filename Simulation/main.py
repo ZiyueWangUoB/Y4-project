@@ -48,7 +48,7 @@ def addPoissonNoise(Matrix):
 
 addPoissonNoise(A)            
             
-plt.pcolormesh(xRange, yRange, A)
+plt.pcolormesh(xRange, yRange, A, cmap="Greys_r")
 plt.show()
 
 
