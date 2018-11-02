@@ -4,15 +4,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import object
+import sys
 
 
 #Probe params
-xRange = [i for i in range(0,1000)]        #100x100 scan for probe, across 100x100
-yRange = [i for i in range(0,1000)]
+xRange = [i for i in range(0,100)]        #100x100 scan for probe, across 100x100
+yRange = [i for i in range(0,100)]
 
 #Generating an test object, let a cube.
 
-cLMax = 500     #Cube length max
+cLMax = 50     #Cube length max
 
 #Generate random parameters of the cube
 aRand = np.random.randint(0,cLMax)
@@ -20,8 +21,8 @@ bRand = np.random.randint(0,cLMax)
 cRand = np.random.randint(0,cLMax)
 
 #Generate random numbers for start position
-xPosRandom = np.random.randint(cLMax/2,max(xRange)-cLMax/2)
-yPosRandom = np.random.randint(cLMax/2,max(yRange)-cLMax/2)
+xPosRandom = np.random.randint(0,max(xRange))
+yPosRandom = np.random.randint(0,max(yRange))
 
 #cube = object.cuboid("tungsten",0,0,0,xPosRandom,yPosRandom,xRange,yRange,aRand,bRand,cRand)
 
@@ -30,7 +31,7 @@ yPosRandom = np.random.randint(cLMax/2,max(yRange)-cLMax/2)
 
 rRand = np.random.randint(0,cLMax)
 sphere = object.sphere("xs",0,0,0,xPosRandom,yPosRandom,xRange,yRange,rRand)
-print(rRand)
+#print(rRand)
 
 sphere.calcThicknessMatrix()
 
@@ -49,6 +50,6 @@ def addPoissonNoise(Matrix):
 addPoissonNoise(A)            
             
 plt.pcolormesh(xRange, yRange, A, cmap="Greys_r")
-plt.show()
-
+#plt.show()
+plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[1])+'.png')     #sys.argv is the input from the bash script
 
