@@ -50,7 +50,7 @@ sphere = object.sphere("xs",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,rRan
 
 #Random cuboid object
 #cube = object.cuboid("cmj",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,aRand,bRand,cRand)
-cube = object.cuboid("cmj",45,45,0,50,50,50,xRange,yRange,10,10,10)
+cube = object.cuboid("cmj",0,0,30,50,50,50,xRange,yRange,10,10,10)
 
 
 
