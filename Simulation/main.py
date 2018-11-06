@@ -47,10 +47,13 @@ sphere = object.sphere("xs",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,rRan
 
 #sphere.calcThicknessMatrix()
 
+alphaRand = np.random.randint(0,90)
+betaRand = np.random.randint(0,90)
+gammaRand = np.random.randint(0,90)
 
 #Random cuboid object
 #cube = object.cuboid("cmj",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,aRand,bRand,cRand)
-cube = object.cuboid("cmj",0,0,30,50,50,50,xRange,yRange,10,10,10)
+cube = object.cuboid("cmj",alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,aRand,bRand,cRand)
 
 
 
@@ -61,7 +64,7 @@ cube = object.cuboid("cmj",0,0,30,50,50,50,xRange,yRange,10,10,10)
 B = cube.thicknessMatrix
 
             
-#addPoissonNoise(B)            
+addPoissonNoise(B)            
            
 plt.pcolormesh(xRange, yRange, B, cmap="Greys_r")
 plt.show()

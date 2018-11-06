@@ -34,7 +34,7 @@ class objectType:
     
     def findIntersectionThickness(self,planes,xProbePos,yProbePos):
         #To find the intersection, we break down the dot product algebra in order to rearrange for an equation to solve t. Computers can't do maths yo.
-        intersections = []
+        z = []
         for i in range(len(planes)):
             if planes[i][0][2] == 0:
                 continue
@@ -49,11 +49,9 @@ class objectType:
                 intersection = np.array([xProbePos,yProbePos,t])
                 #print(intersection)
                 if self.findValidIntersection(planes[i],intersection):
-                #    print('Valid')
-                    intersections.append(intersection)
-                #print(intersections)
-        if intersections:
-            thickness = intersections[-1][2] - intersections[0][2]
+                    z.append(t)
+        if z:
+            thickness = max(z) - min(z)
             return thickness
     
     def findValidIntersection(self,plane,intersection):          #give u the singular plane, has the normal vector, 
@@ -80,6 +78,32 @@ class objectType:
             return True
         elif second < 0:
             return False
+        
+    def findAxis(self,centre,xAxis,yAxis,zAxis,axisAround,ang):
+        xAxis -= centre
+        yAxis -= centre
+        zAxis -= centre
+        if axisAround is 'y':
+            rotateQuaternion = Quaternion(axis = yAxis, angle = ang*math.pi/180)
+            xAxis = rotateQuaternion.rotate(xAxis) 
+            zAxis = rotateQuaternion.rotate(zAxis)
+        elif axisAround is 'x':
+            rotateQuaternion = Quaternion(axis = xAxis, angle = ang*math.pi/180)
+            yAxis = rotateQuaternion.rotate(yAxis)
+            zAxis = rotateQuaternion.rotate(zAxis)
+        elif axisAround is 'z':
+            rotateQuaternion = Quaternion(axis = zAxis, angle = ang*math.pi/180)
+            xAxis = rotateQuaternion.rotate(xAxis)
+            yAxis = rotateQuaternion.rotate(yAxis)
+        
+        xAxis += centre
+        yAxis += centre
+        zAxis += centre
+        self.xAxis = xAxis
+        self.yAxis = yAxis
+        self.zAxis = zAxis
+        
+        
 
 #def findRegion(self)
     #do something Will be overloaded later on.
@@ -117,25 +141,39 @@ class cuboid(objectType):
         c6 = np.array([a/2,b/2,-c/2])
         c7 = np.array([-a/2,b/2,c/2])
         c8 = np.array([a/2,b/2,c/2])
-        return [c1,c2,c3,c4,c5,c6,c7,c8]           #corners are set in the way sketched in notebook, will include diagram later
+        corners = [c1,c2,c3,c4,c5,c6,c7,c8] 
+        for i in range(len(corners)):
+            corners[i] += np.array([self.xPos,self.yPos,self.zPos])
+        return corners     #corners are set in the way sketched in notebook, will include diagram later
         
     #def        #We need to write a function here that resets the object back to the 0,0,0 centre, for rotations, then pushes it back to original location
      
     
     def rotateCorners(self):
         
-        alphaQuaternion = Quaternion(axis=[0,-1,0], angle = self.alpha*math.pi/180)               #bare in mind rotations in y is inverted to what we think - refer to notebook. X and z axis rotation is same as in diagrams
-        betaQuaternion = Quaternion(axis=[1,0,0,], angle = self.beta*math.pi/180)
+        #Rotating corners also rotates the axis!
+        centre = [self.xPos,self.yPos,self.zPos]
+        alphaQuaternion = Quaternion(axis= self.yAxis, angle = self.alpha*math.pi/180)               #bare in mind rotations in y is inverted to what we think - refer to notebook. X and z axis rotation is same as in diagrams
+        self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'y',self.alpha)
+        betaQuaternion = Quaternion(axis=self.xAxis, angle = self.beta*math.pi/180)
+        self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'x',self.beta)
         gammaQuaternion = Quaternion(axis=[0,0,1], angle = self.gamma*math.pi/180)
+        self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'z',self.gamma)
+        
+        #Needs to rotate the axis after each rotation, otherwise it won't work! 
         totalRotationQuaternion = alphaQuaternion*betaQuaternion*gammaQuaternion
         
         corn = self.corners         #Remove later if it's fine
         
         for x in range(len(self.corners)):
+            self.corners[x] -= [self.xPos, self.yPos, self.zPos]
             self.corners[x] = totalRotationQuaternion.rotate(corn[x])
             self.corners[x] += [self.xPos, self.yPos, self.zPos]
         
     def calcThicknessMatrix(self):
+        self.xAxis = np.array([1,0,0])
+        self.yAxis = np.array([0,1,0])
+        self.zAxis = np.array([0,0,1])
         self.corners = self.calculateCornerPosition(self.a,self.b,self.c)           #Calls all the functions to work out the intersection (eventual)
         self.rotateCorners()
         self.Planes = self.generatePlanes()          #Up to planes is still working, rotation is intact
