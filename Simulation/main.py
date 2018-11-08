@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+import tripyr
 import cuboid
 import sphere
 #import sys
@@ -56,23 +57,30 @@ gammaRand = np.random.randint(0,90)
 #cube = object.cuboid("cmj",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,aRand,bRand,cRand)
 #cube = object.cuboid("cmj",alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,aRand,bRand,cRand)
 
-
-
 cube = cuboid.cuboid("cmj",0,0,0,50,50,50,xRange,yRange,20,20,20)
 
+corners = cube.corners
+#print(corners)
 
+#Deformation on corner 1 (corner[0])
+c1 = corners[0] + np.array([2,0,0])         #This is tempoary, we need to write a function to work out the deformation corners, especially if the object will move midway
+c2 = corners[0] + np.array([0,2,0])         #If the object moves halfway, then we invoke it on the object and the corner together. Keep the method within the object
+c3 = corners[0] + np.array([0,0,2])         #classes, but call it in this file to invoke them simultaniously? Think about this
+deform0 = tripyr.tripyr("xcl",0,0,0,50,50,50,xRange,yRange,corners[0],c1,c2,c3)
 
  
 #plotting of STEM prototype (no noise yet)
 
 #A = sphere.thicknessMatrix
 B = cube.thicknessMatrix
-
+C = deform0.thicknessMatrix
+print(C)
+a = B-C
             
-addPoissonNoise(B)            
+#addPoissonNoise(B)            
            
-plt.pcolormesh(xRange, yRange, B, cmap="Greys_r")
-#plt.show()
+plt.pcolormesh(xRange, yRange, a, cmap="Greys_r")
+plt.show()
 #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[1])+'.png')     #sys.argv is the input from the bash script
-plt.savefig('Cuboids/plot'+str(200)+'.png')     #sys.argv is the input from the bash script
+#plt.savefig('Cuboids/plot'+str(200)+'.png')     #sys.argv is the input from the bash script
 

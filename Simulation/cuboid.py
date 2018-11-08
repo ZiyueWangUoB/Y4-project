@@ -19,6 +19,9 @@ class cuboid(object.objectType):
         self.a = a		#a b c are length scales of a cuboid, arbitary
         self.b = b
         self.c = c
+        self.xAxis = np.array([1,0,0])
+        self.yAxis = np.array([0,1,0])
+        self.zAxis = np.array([0,0,1])
         self.thicknessMatrix = self.calcThicknessMatrix()
         #print(self.thicknessMatrix)
         #Place these calls into calcThickness later on to make it straightforward and less messy
@@ -53,10 +56,10 @@ class cuboid(object.objectType):
     #def        #We need to write a function here that resets the object back to the 0,0,0 centre, for rotations, then pushes it back to original location
      
     
-    def rotateCorners(self):
+    def rotateCorners(self,xPos,yPos,zPos):
         
         #Rotating corners also rotates the axis!
-        centre = [self.xPos,self.yPos,self.zPos]
+        centre = [xPos,yPos,zPos]
         alphaQuaternion = Quaternion(axis= self.yAxis, angle = self.alpha*math.pi/180)               #bare in mind rotations in y is inverted to what we think - refer to notebook. X and z axis rotation is same as in diagrams
         self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'y',self.alpha)
         betaQuaternion = Quaternion(axis=self.xAxis, angle = self.beta*math.pi/180)
@@ -75,11 +78,9 @@ class cuboid(object.objectType):
             self.corners[x] += [self.xPos, self.yPos, self.zPos]
         
     def calcThicknessMatrix(self):
-        self.xAxis = np.array([1,0,0])
-        self.yAxis = np.array([0,1,0])
-        self.zAxis = np.array([0,0,1])
+
         self.corners = self.calculateCornerPosition(self.a,self.b,self.c)           #Calls all the functions to work out the intersection (eventual)
-        self.rotateCorners()
+        self.rotateCorners(self.xPos,self.yPos,self.zPos)
         self.Planes = self.generatePlanes()          #Up to planes is still working, rotation is intact
         thicknessMatrix = np.zeros((len(self.xProbeRange),len(self.yProbeRange)))
         for i in range(len(self.xProbeRange)):
