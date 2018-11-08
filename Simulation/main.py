@@ -3,7 +3,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import object
+import cuboid
+import sphere
 #import sys
 
 
@@ -43,7 +44,7 @@ yPosRandom = np.random.randint(bRand,max(yRange)-bRand)
 
 
 rRand = np.random.randint(cLMax/10,cLMax/5)
-sphere = object.sphere("xs",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,rRand)
+sphere = sphere.sphere("xs",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,rRand)
 
 #sphere.calcThicknessMatrix()
 
@@ -53,7 +54,11 @@ gammaRand = np.random.randint(0,90)
 
 #Random cuboid object
 #cube = object.cuboid("cmj",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,aRand,bRand,cRand)
-cube = object.cuboid("cmj",alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,aRand,bRand,cRand)
+#cube = object.cuboid("cmj",alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,aRand,bRand,cRand)
+
+
+
+cube = cuboid.cuboid("cmj",0,0,0,50,50,50,xRange,yRange,20,20,20)
 
 
 
@@ -67,6 +72,7 @@ B = cube.thicknessMatrix
 addPoissonNoise(B)            
            
 plt.pcolormesh(xRange, yRange, B, cmap="Greys_r")
-plt.show()
+#plt.show()
 #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[1])+'.png')     #sys.argv is the input from the bash script
+plt.savefig('Cuboids/plot'+str(200)+'.png')     #sys.argv is the input from the bash script
 
