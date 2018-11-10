@@ -14,19 +14,16 @@ from pyquaternion import Quaternion
 
 
 class cuboid(object.objectType):
-    def __init__(self,material,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange,a,b,c):      #xPos,yPos,zPos all refer to the centre of the object
+    def __init__(self,material,deformation,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange,a,b,c):      #xPos,yPos,zPos all refer to the centre of the object
         super().__init__(material,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange)
+        self.deformation = deformation
         self.a = a		#a b c are length scales of a cuboid, arbitary
         self.b = b
         self.c = c
         self.xAxis = np.array([1,0,0])
         self.yAxis = np.array([0,1,0])
         self.zAxis = np.array([0,0,1])
-        self.thicknessMatrix = self.calcThicknessMatrix()
-        #print(self.thicknessMatrix)
-        #Place these calls into calcThickness later on to make it straightforward and less messy
-
-        #print(self.Planes)
+        self.corners = self.calculateCornerPosition(self.a,self.b,self.c)           #Calls all the functions to work out the intersection (eventual)
 
 
     def generatePlanes(self):            #this is specific for the cuboid shape
@@ -64,7 +61,7 @@ class cuboid(object.objectType):
         self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'y',self.alpha)
         betaQuaternion = Quaternion(axis=self.xAxis, angle = self.beta*math.pi/180)
         self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'x',self.beta)
-        gammaQuaternion = Quaternion(axis=[0,0,1], angle = self.gamma*math.pi/180)
+        gammaQuaternion = Quaternion(axis=self.zAxis, angle = self.gamma*math.pi/180)
         self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'z',self.gamma)
         
         #Needs to rotate the axis after each rotation, otherwise it won't work! 
@@ -77,21 +74,10 @@ class cuboid(object.objectType):
             self.corners[x] = totalRotationQuaternion.rotate(corn[x])
             self.corners[x] += [self.xPos, self.yPos, self.zPos]
         
-    def calcThicknessMatrix(self):
-
-        self.corners = self.calculateCornerPosition(self.a,self.b,self.c)           #Calls all the functions to work out the intersection (eventual)
+    def doRotation(self):
         self.rotateCorners(self.xPos,self.yPos,self.zPos)
-        self.Planes = self.generatePlanes()          #Up to planes is still working, rotation is intact
-        thicknessMatrix = np.zeros((len(self.xProbeRange),len(self.yProbeRange)))
-        for i in range(len(self.xProbeRange)):
-            for u in range (len(self.yProbeRange)):
-               intersects = self.findIntersectionThickness(self.Planes,i,u)
-               if intersects:
-                    thicknessMatrix[i][u] = intersects                              #Outputs the intersects on thickness matrix!
-        intersects = self.findIntersectionThickness(self.Planes,i,u)            
-       # print(thicknessMatrix[50][50])
-            
-        return thicknessMatrix
+        self.planes = self.generatePlanes()          #Up to planes is still working, rotation is intact
+
     
 
 

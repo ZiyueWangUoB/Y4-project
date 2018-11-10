@@ -41,7 +41,6 @@ class objectType:
             else:
                 #print(planes[i])
                 
-                
                 xMinusxo = xProbePos-planes[i][1][0]            #first is plane number, second is normal or corner (ranging from 1 to 4), third is x,y,z
                 yMinusyo = yProbePos-planes[i][1][1]
                 t = -(planes[i][0][0]*xMinusxo + planes[i][0][1]*yMinusyo)/planes[i][0][2] + planes[i][1][2]
@@ -59,6 +58,8 @@ class objectType:
         o2 = self.orient(intersection,plane[3],plane[4],plane[0])
         o3 = self.orient(intersection,plane[4],plane[2],plane[0])
         o4 = self.orient(intersection,plane[2],plane[1],plane[0])
+        #print(o1,o2,o3,o4)
+        #print(intersection,plane[1],plane[2],plane[3],plane[4])
         
         if o1 and o2 and o3 and o4:
             #print("its true")
@@ -73,10 +74,10 @@ class objectType:
     
     def orient(self,q,p1,p2,n):           #q is intersect, p1 & p2 are two points, n is normal
         first = np.cross((p1-q),(p2-q))
-        second = np.dot(first,n)
+        second = int(np.dot(first,n))
         if second > 0:
             return True
-        elif second < 0:
+        elif second <= 0:
             return False
         
     def findAxis(self,centre,xAxis,yAxis,zAxis,axisAround,ang):

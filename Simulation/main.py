@@ -1,24 +1,38 @@
 #31/10/2018 
 #This is the main file where most stuff is done. Classes will be written as their own modules yeah. 
 import matplotlib.pyplot as plt
+import math
 import numpy as np
 
 import tripyr
 import cuboid
 import sphere
+import addDeformation as aD
 #import sys
 
-
+#Set of functions
 #Function to add noise to the matrix
 def addPoissonNoise(Matrix):
     for i in range(len(xRange)):
         for u in range (len(yRange)):
-            noise = np.random.poisson(rRand)            #How big should the noise be? Any ideas?
+            noise = np.random.poisson(5)            #How big should the noise be? Any ideas? #relative to mean intensity
             Matrix[i][u] += noise
             
-            
-            
-            
+def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
+    thicknessMatrix = np.zeros((len(xProbeRange),len(yProbeRange)))
+    for i in range(len(xProbeRange)):
+        for u in range (len(yProbeRange)):
+            for a in range(len(objects)):
+                thisObject = objects[a]
+                intersects = thisObject.findIntersectionThickness(thisObject.planes,i,u)
+                if intersects:
+                    if not thisObject.deformation:
+                        thicknessMatrix[i][u] += intersects                              #Outputs the intersects on thickness matrix!
+                    else:
+                        thicknessMatrix[i][u] -= intersects
+        # print(thicknessMatrix[50][50])
+
+    return thicknessMatrix
 
 #Probe params
 #xRange = [i for i in range(0,int(sys.argv[2]))]        #100x100 scan for probe, across 100x100
@@ -45,7 +59,7 @@ yPosRandom = np.random.randint(bRand,max(yRange)-bRand)
 
 
 rRand = np.random.randint(cLMax/10,cLMax/5)
-sphere = sphere.sphere("xs",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,rRand)
+#sphere = sphere.sphere("xs",False,0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,rRand)
 
 #sphere.calcThicknessMatrix()
 
@@ -57,29 +71,30 @@ gammaRand = np.random.randint(0,90)
 #cube = object.cuboid("cmj",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,aRand,bRand,cRand)
 #cube = object.cuboid("cmj",alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,aRand,bRand,cRand)
 
-cube = cuboid.cuboid("cmj",0,0,0,50,50,50,xRange,yRange,20,20,20)
+cube = cuboid.cuboid("cmj",False,0,0,30,50,50,50,xRange,yRange,20,20,20)
+objects = [cube]
 
-corners = cube.corners
-#print(corners)
+deforms = aD.addDeformation(cube,'cuboid')
+dA = deforms.deformArray
 
-#Deformation on corner 1 (corner[0])
-c1 = corners[0] + np.array([2,0,0])         #This is tempoary, we need to write a function to work out the deformation corners, especially if the object will move midway
-c2 = corners[0] + np.array([0,2,0])         #If the object moves halfway, then we invoke it on the object and the corner together. Keep the method within the object
-c3 = corners[0] + np.array([0,0,2])         #classes, but call it in this file to invoke them simultaniously? Think about this
-deform0 = tripyr.tripyr("xcl",0,0,0,50,50,50,xRange,yRange,corners[0],c1,c2,c3)
 
- 
-#plotting of STEM prototype (no noise yet)
+for i in range(len(dA)):
+    deformation = tripyr.tripyr("xcl",True,0,0,30,50,50,50,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
+    objects.append(deformation)
 
-#A = sphere.thicknessMatrix
-B = cube.thicknessMatrix
-C = deform0.thicknessMatrix
-print(C)
-a = B-C
+
+for i in range(len(objects)):
+    objects[i].doRotation()
+
+image = calcThicknessMatrix(objects,xRange,yRange) + 5
+
+#print(cube.corners)
+#print(deform0.corners)
+
             
-#addPoissonNoise(B)            
+#addPoissonNoise(image)
            
-plt.pcolormesh(xRange, yRange, a, cmap="Greys_r")
+plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
 plt.show()
 #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[1])+'.png')     #sys.argv is the input from the bash script
 #plt.savefig('Cuboids/plot'+str(200)+'.png')     #sys.argv is the input from the bash script

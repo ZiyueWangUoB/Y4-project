@@ -15,15 +15,15 @@ import math
 from pyquaternion import Quaternion
 
 class tripyr(object.objectType):
-    def __init__(self,material,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange,corner,cornA,cornB,cornC):
+    def __init__(self,material,deformation,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange,corner,cornA,cornB,cornC,xAxis,yAxis,zAxis):
         #corner is defined as the corner the deformation is occuring on the cuboid/other shape.
         super().__init__(material,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange)
         self.corners = np.array([corner,cornA,cornB,cornC])
-        self.xAxis = np.array([1,0,0])      #Initial axis conditions analogous to that of cuboid
+        self.xAxis = np.array([1,0,0])
         self.yAxis = np.array([0,1,0])
         self.zAxis = np.array([0,0,1])
-        self.thicknessMatrix = self.calcThicknessMatrix()
-        #We're going to limit this. Corner 
+        self.deformation = deformation
+        self.planes = self.generatePlanes(self.corners)
         
     def findPlane(self,c1,c2,c3): #This is generic for any plane
         vector12 = c2 - c1
@@ -32,20 +32,9 @@ class tripyr(object.objectType):
         nNorm = n/np.linalg.norm(n)
         return nNorm, c1, c2, c3
     
-    def calcThicknessMatrix(self):
+    def doRotation(self):
         corners = self.rotateCorners(self.corners,self.xPos,self.yPos,self.zPos)
-        planes = self.generatePlanes(corners)
-        thicknessMatrix = np.zeros((len(self.xProbeRange),len(self.yProbeRange)))
-        for i in range(len(self.xProbeRange)):
-            for u in range (len(self.yProbeRange)):
-                intersects = self.findIntersectionThickness(planes,i,u)
-                if intersects:
-                    thicknessMatrix[i][u] = intersects
-        intersects = self.findIntersectionThickness(planes,i,u)
-        
-        return thicknessMatrix
-        
-        
+        self.planes = self.generatePlanes(corners)
     
     def rotateCorners(self,corners,xPos,yPos,zPos):
         #Since this class is going to be made for deformations, the corners will be rotated as the cuboid object
@@ -75,9 +64,10 @@ class tripyr(object.objectType):
         return [p1,p2,p3,p4]
     
     def findValidIntersection(self,plane,intersection):          #give u the singular plane, has the normal vector, 
-        o1 = self.orient(intersection,plane[1],plane[2],plane[0])
-        o2 = self.orient(intersection,plane[2],plane[3],plane[0])
-        o3 = self.orient(intersection,plane[3],plane[1],plane[0])
+        o1 = self.orient(intersection,plane[2],plane[1],plane[0])
+        o2 = self.orient(intersection,plane[3],plane[2],plane[0])
+        o3 = self.orient(intersection,plane[1],plane[3],plane[0])
+        #print(intersection,plane[2],plane[3],plane[0])
         
         if o1 and o2 and o3:
             #print("its true")
@@ -88,11 +78,7 @@ class tripyr(object.objectType):
         else:
             #print("its false")
             return False
-    
-    
-    
-        
-        
+
         
         
         
