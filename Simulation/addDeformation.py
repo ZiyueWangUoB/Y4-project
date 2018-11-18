@@ -22,7 +22,7 @@ class addDeformation:
         if objectType is 'cuboid':
             vcorn = self.findAxisCuboid(self.corners)
             numOfDeformations = np.random.randint(0,8)
-            #numOfDeformations = 4
+            #numOfDeformations = 8
             random.sample(range(0,8),numOfDeformations)
             
             for i in range(numOfDeformations):
@@ -32,10 +32,17 @@ class addDeformation:
         return deformArray
         
     def cornerDeformation(self,vcorn,cornerNum):
+        
         c1 = self.corners[cornerNum]
-        a = 10              #Make these randomly generate later
-        b = 10
-        c = 10
+        #a = np.random.randint(1,20)              #Make these randomly generate later
+        #b = np.random.randint(1,20)
+        #c = np.random.randint(1,20)
+        
+        a = 15
+        b = 15
+        c = 25
+        
+        
         c2 = c1 + a*vcorn[0]
         c3 = c1 + b*vcorn[1]
         c4 = c1 + c*vcorn[2]

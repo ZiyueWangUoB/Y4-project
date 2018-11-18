@@ -1,6 +1,7 @@
 #31/10/2018 
 #This is the main file where most stuff is done. Classes will be written as their own modules yeah. 
 import matplotlib.pyplot as plt
+import scipy.ndimage.filters
 import math
 import numpy as np
 
@@ -22,8 +23,21 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
     thicknessMatrix = np.zeros((len(xProbeRange),len(yProbeRange)))
     for i in range(len(xProbeRange)):
         for u in range (len(yProbeRange)):
+            #Random probability for the object to rotate during imaging, by a small angle.
+            rotRand = np.random.randint(0,2)
+            if rotRand == 1:
+                alphaRand = np.random.randint(0,3)
+                betaRand = np.random.randint(0,3)
+                gammaRand = np.random.randint(0,3)
+    
             for a in range(len(objects)):
                 thisObject = objects[a]
+                
+                if rotRand == 1:
+                    thisObject.alpha += alphaRand
+                    thisObject.beta += betaRand
+                    thisObject.gamma += gammaRand
+                
                 intersects = thisObject.findIntersectionThickness(thisObject.planes,i,u)
                 if intersects:
                     if not thisObject.deformation:
@@ -33,11 +47,6 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
         # print(thicknessMatrix[50][50])
 
     return thicknessMatrix
-
-#Probe params
-#xRange = [i for i in range(0,int(sys.argv[2]))]        #100x100 scan for probe, across 100x100
-#yRange = [i for i in range(0,int(sys.argv[2]))]
-#zRange = [i for i in range(0,int(sys.argv[2]))]
 
 xRange = [i for i in range(0,100)]        #100x100 scan for probe, across 100x100
 yRange = [i for i in range(0,100)]
@@ -49,13 +58,13 @@ zRange = [i for i in range(0,100)]
 cLMax = 50     #Cube length max
 
 #Generate random parameters of the cube
-aRand = np.random.randint(cLMax/10,cLMax)
-bRand = np.random.randint(cLMax/10,cLMax)
-cRand = np.random.randint(cLMax/10,cLMax)
+aRand = np.random.randint(40,50)
+bRand = np.random.randint(40,50)
+cRand = np.random.randint(40,50)
 
 #Generate random numbers for start position
-xPosRandom = np.random.randint(aRand,max(xRange)-aRand)         #This is to make sure the object stays within the confides of the image!
-yPosRandom = np.random.randint(bRand,max(yRange)-bRand)
+xPosRandom = np.random.randint(45,56)         #This is to make sure the object stays within the confides of the image!
+yPosRandom = np.random.randint(45,56)          #Centered at between 45 and 55.
 
 
 rRand = np.random.randint(cLMax/10,cLMax/5)
@@ -71,7 +80,7 @@ gammaRand = np.random.randint(0,90)
 #cube = object.cuboid("cmj",0,0,0,xPosRandom,yPosRandom,cLMax,xRange,yRange,aRand,bRand,cRand)
 #cube = object.cuboid("cmj",alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,aRand,bRand,cRand)
 
-cube = cuboid.cuboid("cmj",False,0,0,30,50,50,50,xRange,yRange,20,20,20)
+cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,50,50,50)
 objects = [cube]
 
 deforms = aD.addDeformation(cube,'cuboid')
@@ -79,20 +88,20 @@ dA = deforms.deformArray
 
 
 for i in range(len(dA)):
-    deformation = tripyr.tripyr("xcl",True,0,0,30,50,50,50,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
+    deformation = tripyr.tripyr("xcl",True,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
     objects.append(deformation)
 
 
 for i in range(len(objects)):
     objects[i].doRotation()
 
-image = calcThicknessMatrix(objects,xRange,yRange) + 5
+image = calcThicknessMatrix(objects,xRange,yRange) + 10
 
-#print(cube.corners)
-#print(deform0.corners)
+#Adding gaussian blur
+image = scipy.ndimage.filters.gaussian_filter(image,1)
 
-            
-#addPoissonNoise(image)
+#Adding poisson noise
+addPoissonNoise(image)
            
 plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
 plt.show()
