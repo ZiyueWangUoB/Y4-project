@@ -54,7 +54,7 @@ class cuboid(object.objectType):
      
     
     def rotateCorners(self,xPos,yPos,zPos):
-        
+        #print(('this is gamma') + str(self.gamma))
         #Rotating corners also rotates the axis!
         centre = [xPos,yPos,zPos]
         alphaQuaternion = Quaternion(axis= self.yAxis, angle = self.alpha*math.pi/180)               #bare in mind rotations in y is inverted to what we think - refer to notebook. X and z axis rotation is same as in diagrams

@@ -21,12 +21,16 @@ class addDeformation:
         deformArray = []
         if objectType is 'cuboid':
             vcorn = self.findAxisCuboid(self.corners)
-            numOfDeformations = np.random.randint(0,8)
+            #numOfDeformations = np.random.randint(0,8)
             #numOfDeformations = 8
-            random.sample(range(0,8),numOfDeformations)
+            #random.sample(range(0,8),numOfDeformations)
+            deformTheseCorners = [1]
             
-            for i in range(numOfDeformations):
-                u = self.cornerDeformation(vcorn[i],i)
+            #Need to think of a way so that the deformed corners don't go as 1,2,3,4,5,6 e.t.c
+            #For now we set the specific number
+            
+            for i in range(len(deformTheseCorners)):
+                u = self.cornerDeformation(vcorn[deformTheseCorners[i]],deformTheseCorners[i])
                 deformArray.append(u)
                 
         return deformArray
@@ -38,8 +42,8 @@ class addDeformation:
         #b = np.random.randint(1,20)
         #c = np.random.randint(1,20)
         
-        a = 15
-        b = 15
+        a = 25
+        b = 25
         c = 25
         
         
