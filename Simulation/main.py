@@ -9,7 +9,7 @@ import tripyr
 import cuboid
 import sphere
 import addDeformation as aD
-#import sys
+import sys
 
 #Set of functions
 #Function to add noise to the matrix
@@ -83,12 +83,12 @@ for g in range(1):
 
     #sphere.calcThicknessMatrix()
 
-    alphaRand = np.random.randint(0,90)
-    betaRand = np.random.randint(0,90)
-    gammaRand = np.random.randint(0,90)
+    alphaRand = np.random.randint(0,360)
+    betaRand = np.random.randint(0,360)
+    gammaRand = np.random.randint(0,360)
 
 
-    cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,50,50,50)
+    cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,aRand,bRand,cRand)
     objects = [cube]
 
     #deformations calculated and set here
@@ -97,7 +97,7 @@ for g in range(1):
 
     #The deformations are tripyr which are created in this loop
     for i in range(len(dA)):
-        deformation = tripyr.tripyr("xcl",True,0,0,0,50,50,50,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
+        deformation = tripyr.tripyr("xcl",True,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
         objects.append(deformation)
 
 
@@ -109,21 +109,19 @@ for g in range(1):
     file.write(str(dA[:][0]))
     file.close()
 
-    for z in range(91):         #Loop out here means each object is just generated once and rotated through, rather than generating multiple objects - saving computaitonal time.
-        image = calcThicknessMatrix(objects,xRange,yRange) + 10
 
-        #Adding gaussian blur
-        image = scipy.ndimage.filters.gaussian_filter(image,1)
+    image = calcThicknessMatrix(objects,xRange,yRange) + 10
 
-        #Adding poisson noise
-        addPoissonNoise(image)
-        
-        plt.figure(figsize=(6,6))
-        plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
-        #plt.show()
-        #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
-        plt.savefig('Cuboids/plot'+str(z)+'all.png')     #sys.argv is the input from the bash script
-        plt.close()
-        print(z)
-        rotateThroughBy90(objects)      #Not only rotate but you need to call the function to recalculate intersections e.t.c for each object! factor of 5 out somehow?
+    #Adding gaussian blur
+    image = scipy.ndimage.filters.gaussian_filter(image,1)
+
+    #Adding poisson noise
+    addPoissonNoise(image)
+    plt.figure(figsize=(6,6))
+    plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
+    #plt.show()
+    #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
+    plt.savefig('/Users/ziyuewang/Documents/Y4ProjectImages/Cuboids/1Deformation/image' + str(sys.argv[1]) + '.png')     #sys.argv is the input from the bash script
+    plt.close()
+
 
