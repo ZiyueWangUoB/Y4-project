@@ -114,14 +114,16 @@ for g in range(1):
 
     #Adding gaussian blur
     image = scipy.ndimage.filters.gaussian_filter(image,1)
-
+    
     #Adding poisson noise
     addPoissonNoise(image)
-    plt.figure(figsize=(6,6))
+    #plt.figure(figsize=(5,5))
     plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
+    
     #plt.show()
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
-    plt.savefig('/Users/ziyuewang/Documents/Y4ProjectImages/Cuboids/1Deformation/image' + str(sys.argv[1]) + '.png')     #sys.argv is the input from the bash script
+    #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
+    plt.imsave('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png',image,format='png',cmap = 'gray')
     plt.close()
 
 

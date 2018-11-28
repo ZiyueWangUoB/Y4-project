@@ -1,11 +1,11 @@
-chmod u+x /Users/ziyuewang/Documents/Y4\ project/RunSimulation.command
-cd /Users/ziyuewang/Documents/Y4\ project/Simulation/
+chmod u+x /home/z/Documents/Y4projects/RunSimulation.command
+cd /home/z/Documents/Y4projects/Simulation/
 
 
 printf "Progress, please wait"
-for ((a = 0; a < 200; a++))
+for ((a = 477; a < 1000; a++))
 do 
-	python main.py $a
+	python3 main.py $a
 	printf $a
 done
 printf "Done"
