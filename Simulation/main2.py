@@ -4,13 +4,19 @@ import matplotlib.pyplot as plt
 import scipy.ndimage.filters
 import math
 import numpy as np
+from multiprocessing import Pool
 
 import tripyr
 import cuboid
 import sphere
 import addDeformation as aD
 import sys
-import time         #Use this to test how long parts of the code take.
+import time
+
+objects = []                #Leaving it here as a global variable, so that the functions can read it.
+xRange = [i for i in range(0,100)]        #100x100 scan for probe, across 100x100
+yRange = [i for i in range(0,100)]
+zRange = [i for i in range(0,100)]
 
 
 #Set of functions
@@ -18,39 +24,47 @@ import time         #Use this to test how long parts of the code take.
 def addPoissonNoise(Matrix):
     for i in range(len(xRange)):
         for u in range (len(yRange)):
-            noise = np.random.poisson(5)            #How big should the noise be? Any ideas? #relative to mean intensity
+            noise = np.random.poisson(8)            #How big should the noise be? Any ideas? #relative to mean intensity
             Matrix[i][u] += noise
             
 def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
-    
+    p = Pool()
+    p.map(y,xRange)
     thicknessMatrix = np.zeros((len(xProbeRange),len(yProbeRange)))
-    for i in range(len(xProbeRange)):
-        for u in range (len(yProbeRange)):
-            #Random probability for the object to rotate during imaging, by a small angle.
+    for n in xRange:
+        #thicknessMatrix.append(y(n))
+        thicknessMatrix[n][:] += y(n)
+    print(thicknessMatrix[0])
+    return thicknessMatrix
+
+def y(i):               #Function for multiprocessing to call
+    thicknessList = np.zeros(len(yRange))
+    for u in range (len(yRange)):
+        #Random probability for the object to rotate during imaging, by a small angle.
             #rotRand = np.random.randint(0,2)
             
-            rotRand = 0
-            if rotRand == 1:
-                alphaRand = np.random.randint(0,3)
-                betaRand = np.random.randint(0,3)
-                gammaRand = np.random.randint(0,3)
+        rotRand = 0
+        if rotRand == 1:
+            alphaRand = np.random.randint(0,3)
+            betaRand = np.random.randint(0,3)
+            gammaRand = np.random.randint(0,3)
+        
+        for a in range(len(objects)):
+            thisObject = objects[a]
             
-            for a in range(len(objects)):
-                thisObject = objects[a]
-                
-                if rotRand == 1:
-                    thisObject.alpha = alphaRand
-                    thisObject.beta = betaRand
-                    thisObject.gamma = gammaRand
-                
-                intersects = thisObject.findIntersectionThickness(thisObject.planes,i,u)
-                if intersects:
-                    if not thisObject.deformation:
-                        thicknessMatrix[i][u] += intersects                              #Outputs the intersects on thickness matrix!
-                    else:
-                        thicknessMatrix[i][u] -= intersects
-        # print(thicknessMatrix[50][50])
-    return thicknessMatrix
+            if rotRand == 1:
+                thisObject.alpha = alphaRand
+                thisObject.beta = betaRand
+                thisObject.gamma = gammaRand
+            
+            intersects = thisObject.findIntersectionThickness(thisObject.planes,i,u)
+            if intersects:
+                if not thisObject.deformation:
+                    thicknessList[u] += intersects                              #Thickness Lists
+                else:
+                    thicknessList[u] -= intersects
+    return thicknessList
+
 
 def rotateThroughBy90(objects):
     for a in range(len(objects)):
@@ -63,13 +77,7 @@ def rotateThroughBy90(objects):
 
 
 
-xRange = [i for i in range(0,100)]        #100x100 scan for probe, across 100x100
-yRange = [i for i in range(0,100)]
-zRange = [i for i in range(0,100)]
-
-
 for g in range(1):
-    
 
     #Generating an test object, let a cube.
 
@@ -94,7 +102,8 @@ for g in range(1):
 
 
     cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,aRand,bRand,cRand)
-    objects = [cube]
+    #cube = cuboid.cuboid('cmj',False,20,31,21,50,50,50,xRange,yRange,12,30,50)
+    objects.append(cube)
 
     #deformations calculated and set here
     deforms = aD.addDeformation(cube,'cuboid')
@@ -108,14 +117,14 @@ for g in range(1):
 
     for i in range(len(objects)):
         objects[i].doRotation()
+    
 
-
-    file = open('cube orientations.txt', 'w')
-    file.write(str(dA[:][0]))
-    file.close()
+    #file = open('cube orientations.txt', 'w')
+    #file.write(str(dA[:][0]))
+    #file.close()
 
     start_time = time.time()
-    image = calcThicknessMatrix(objects,xRange,yRange) + 10             #This is whats causing the issue
+    image = calcThicknessMatrix(objects,xRange,yRange) + 10
     elapsed_time = time.time() - start_time
     print(elapsed_time)
 
@@ -127,9 +136,11 @@ for g in range(1):
     #plt.figure(figsize=(5,5))
     plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
     
-    #plt.show()
+    plt.show()
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    #plt.imsave('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png',image,format='png',cmap = 'gray')
-    plt.close()
+    #plt.imsave('/home/z/Documents/pics/0deform/image' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    #plt.imsave('/home/z/Documents/pics/0deform/test1.jpg',image,format='jpg',cmap='gray')
+    #plt.close()
+
 
