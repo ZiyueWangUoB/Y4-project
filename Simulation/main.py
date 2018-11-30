@@ -92,7 +92,9 @@ for g in range(1):
     objects = [cube]
 
     #deformations calculated and set here
-    deforms = aD.addDeformation(cube,'cuboid')
+    deformTheseCorners = sys.argv[2].split(',')
+    deformTheseCornersResult = list(map(int,deformTheseCorners))        #Only problem is we can't not deform any corners, which is fine cuz that set has already been done. We can adjust for later tho!
+    deforms = aD.addDeformation(cube,'cuboid',deformTheseCornersResult)
     dA = deforms.deformArray
 
     #The deformations are tripyr which are created in this loop
@@ -123,7 +125,7 @@ for g in range(1):
     #plt.show()
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    plt.imsave('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png',image,format='png',cmap = 'gray')
+    plt.imsave('/home/z/Documents/pics/' + str(sys.argv[3]) + '/image' + str(sys.argv[1]) + '.png',image,format='png',cmap = 'gray')
     plt.close()
 
 

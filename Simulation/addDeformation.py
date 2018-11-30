@@ -11,20 +11,21 @@ import numpy as np
 import random
 
 class addDeformation:
-    def __init__(self,theObject,objectType):
+    def __init__(self,theObject,objectType,cornersToDeform):
         self.object = theObject
         self.corners = theObject.corners
         #Add deformation in the rest of the constructor
-        self.deformArray = self.classObject(objectType)
+        self.deformArray = self.classObject(objectType,cornersToDeform)
         
-    def classObject(self,objectType):
+    def classObject(self,objectType,cornersToDeform):
         deformArray = []
         if objectType is 'cuboid':
             vcorn = self.findAxisCuboid(self.corners)
             #numOfDeformations = np.random.randint(0,8)
             #numOfDeformations = 8
             #random.sample(range(0,8),numOfDeformations)
-            deformTheseCorners = [1]
+            deformTheseCorners = cornersToDeform
+            print(deformTheseCorners)
             
             #Need to think of a way so that the deformed corners don't go as 1,2,3,4,5,6 e.t.c
             #For now we set the specific number
