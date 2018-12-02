@@ -25,7 +25,6 @@ class addDeformation:
             #numOfDeformations = 8
             #random.sample(range(0,8),numOfDeformations)
             deformTheseCorners = cornersToDeform
-            print(deformTheseCorners)
             
             #Need to think of a way so that the deformed corners don't go as 1,2,3,4,5,6 e.t.c
             #For now we set the specific number
