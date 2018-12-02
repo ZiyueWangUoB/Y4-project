@@ -1,10 +1,11 @@
-#31/10/2018 
+#31/10/2018 :w
+
 #This is the main file where most stuff is done. Classes will be written as their own modules yeah. 
 import matplotlib.pyplot as plt
 import scipy.ndimage.filters
 import math
 import numpy as np
-
+import time
 import tripyr
 import cuboid
 import sphere
@@ -18,11 +19,27 @@ def addPoissonNoise(Matrix):
         for u in range (len(yRange)):
             noise = np.random.poisson(5)            #How big should the noise be? Any ideas? #relative to mean intensity
             Matrix[i][u] += noise
-            
+
+def findMaxAndMin(mainObject):
+    corners = mainObject.corners
+    zipped = zip(*corners)          #Converts rows to columns basically
+    newArray = np.array([i for i in zipped])         #Makes it to a readable thing - now we can find max and min of x,y,z
+    minX = np.amin(newArray[0])
+    maxX = np.amax(newArray[0])
+    minY = np.amin(newArray[1])
+    maxY = np.amax(newArray[1])
+    return [(minX,maxX), (minY,maxY)]
+    
+
 def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
     thicknessMatrix = np.zeros((len(xProbeRange),len(yProbeRange)))
+    minMax = findMaxAndMin(objects[0])      #Calculate the original min and max values for x and y
     for i in range(len(xProbeRange)):
+        if i < minMax[0][0] or i > minMax[0][1]:
+            continue
         for u in range (len(yProbeRange)):
+            if u < minMax[1][0] or u > minMax[1][1]:
+                continue
             #Random probability for the object to rotate during imaging, by a small angle.
             rotRand = np.random.randint(0,50)
 
@@ -30,6 +47,8 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
                 alphaRand = np.random.randint(0,3)
                 betaRand = np.random.randint(0,3)
                 gammaRand = np.random.randint(0,3)
+                #Also needs to calculate new min and max values for the next loops. 
+                minMax = findMaxAndMin(objects[0])
             
             for a in range(len(objects)):
                 thisObject = objects[a]
@@ -88,6 +107,7 @@ for g in range(1):
 
 
     cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,aRand,bRand,cRand)
+    #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
     objects = [cube]
     
     if len(sys.argv) > 1:
@@ -97,6 +117,7 @@ for g in range(1):
     else:
         deformTheseCornersResult = []
 
+
     deforms = aD.addDeformation(cube,'cuboid',deformTheseCornersResult)
     dA = deforms.deformArray
 
@@ -105,9 +126,10 @@ for g in range(1):
         deformation = tripyr.tripyr("xcl",True,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
         objects.append(deformation)
 
-
+    tSubZero = time.time()
     for i in range(len(objects)):
         objects[i].doRotation()
+    print(time.time()-tSubZero)
     
    # print(objects)
 
@@ -116,7 +138,12 @@ for g in range(1):
    # file.close()
 
 
+	#Need to use function to find the optimal area for the probe to operate. Does this interfere with the rotations while moving? If so how to fix. 
+	#We can call the function once here as a preliminary, and call again during the loop?
+
+    t0 = time.time()
     image = calcThicknessMatrix(objects,xRange,yRange) + 10
+    print(time.time()-t0)
 
     #Adding gaussian blur
     image = scipy.ndimage.filters.gaussian_filter(image,1)
@@ -126,10 +153,10 @@ for g in range(1):
     #plt.figure(figsize=(5,5))
     plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
     
-    #plt.show()
+    plt.show()
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    plt.imsave('/home/z/Documents/pics/' + str(sys.argv[3]) + '/image' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    #plt.imsave('/home/z/Documents/pics/' + str(sys.argv[3]) + '/image' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
     plt.close()
 
 
