@@ -39,13 +39,13 @@ class addDeformation:
     def cornerDeformation(self,vcorn,cornerNum,sf):
         
         c1 = self.corners[cornerNum]
-        #a = np.random.randint(1,20)              #Make these randomly generate later
-        #b = np.random.randint(1,20)
-        #c = np.random.randint(1,20)
+        a = np.random.randint(30*sf,50*sf)              #Make these randomly generate later
+        b = np.random.randint(30*sf,50*sf)
+        c = np.random.randint(30*sf,50*sf)
         
-        a = 20*sf
-        b = 20*sf
-        c = 20*sf
+        #a = 50*sf
+        #b = 50*sf
+        #c = 50*sf
         
         
         c2 = c1 + a*vcorn[0]

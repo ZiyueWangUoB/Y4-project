@@ -13,12 +13,14 @@ import addDeformation as aD
 import sys
 import random
 
+sf = 2
+
 #Set of functions
 #Function to add noise to the matrix
 def addPoissonNoise(Matrix):
     for i in range(len(xRange)):
         for u in range (len(yRange)):
-            noise = np.random.poisson(5)            #How big should the noise be? Any ideas? #relative to mean intensity
+            noise = np.random.poisson(5*sf)            #How big should the noise be? Any ideas? #relative to mean intensity
             Matrix[i][u] += noise
 
 def findMaxAndMin(mainObject):
@@ -42,27 +44,32 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
             if u < minMax[0][1][0] or u > minMax[0][1][1]:
                 continue
             #Random probability for the object to rotate during imaging, by a small angle.
-            rotRand = np.random.randint(0,100)
+#            rotRand = np.random.randint(0,500)
 
-            if rotRand == 1:
-                alphaRand = np.random.randint(0,3)
-                betaRand = np.random.randint(0,3)
-                gammaRand = np.random.randint(0,3)
+            '''
+            if rotRand == 1: 
+                alphaRand = np.random.randint(-3,3)*0.2
+                betaRand = np.random.randint(-3,3)*0.2
+                gammaRand = np.random.randint(-3,3)*0.2
                 #Also needs to calculate new min and max values for the next loops. 
                 minMax = [findMaxAndMin(objects[i]) for i in range(0,len(objects))]
                 #print(minMax)
+'''
 
             for a in range(len(objects)):
-                if i < minMax[a][0][0] or i > minMax[a][0][1] or u < minMax[a][1][0] or u > minMax[a][1][1]:
-                    continue
-
+               # if a == 0:
+                #    continue
                 thisObject = objects[a]
-                
+                '''
                 if rotRand == 1:
                     thisObject.alpha = alphaRand
                     thisObject.beta = betaRand
                     thisObject.gamma = gammaRand
-                    #thisObject.doRotation()
+                    thisObject.doRotation()
+                '''
+                
+                if i < minMax[a][0][0] or i > minMax[a][0][1] or u < minMax[a][1][0] or u > minMax[a][1][1]:
+                    continue
                 
                 intersects = thisObject.findIntersectionThickness(thisObject.planes,i,u)
                 if intersects:
@@ -83,10 +90,9 @@ def rotateThroughBy90(objects):
         thisObject.doRotation()
     return objects
 
-sf = 1
-xRange = [i for i in range(0,100*sf)]        #100x100 scan for probe, across 100x100
-yRange = [i for i in range(0,100*sf)]
-zRange = [i for i in range(0,100*sf)]
+xRange = [i for i in range(0,128*sf)]        #100x100 scan for probe, across 100x100
+yRange = [i for i in range(0,128*sf)]
+zRange = [i for i in range(0,128*sf)]
 
 
 for g in range(1):
@@ -94,13 +100,13 @@ for g in range(1):
     #Generating an test object, let a cube.
 
     #Generate random parameters of the cube
-    aRand = np.random.randint(40*sf,60*sf)
-    bRand = np.random.randint(40*sf,60*sf)
-    cRand = np.random.randint(40*sf,60*sf)
+    aRand = np.random.randint(54*sf,74*sf)
+    bRand = np.random.randint(54*sf,74*sf)
+    cRand = np.random.randint(54*sf,74*sf)
 
     #Generate random numbers for start position
-    xPosRandom = np.random.randint(45*sf,55*sf)         #This is to make sure the object stays within the confides of the image!
-    yPosRandom = np.random.randint(45*sf,55*sf)          #Centered at between 45 and 55.
+    xPosRandom = np.random.randint(59*sf,70*sf)         #This is to make sure the object stays within the confides of the image!
+    yPosRandom = np.random.randint(59*sf,70*sf)          #Centered at between 45 and 55.
 
 
     #rRand = np.random.randint(cLMax/10,cLMax/5)
@@ -113,7 +119,7 @@ for g in range(1):
     gammaRand = np.random.randint(0,360)
 
 
-    cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50*sf,xRange,yRange,aRand,bRand,cRand)
+    cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,64*sf,xRange,yRange,aRand,bRand,cRand)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
     objects = [cube]
     
@@ -128,7 +134,7 @@ for g in range(1):
     #Alternate method for randomly generating three corners
     if len(sys.argv) > 1:
         deformTheseCornersResult = random.sample(range(0,8),int(sys.argv[2]))
-        print(deformTheseCornersResult)
+        #print(deformTheseCornersResult)
     else:
         deformTheseCornersResult = []
 
@@ -137,7 +143,7 @@ for g in range(1):
 
     #The deformations are tripyr which are created in this loop
     for i in range(len(dA)):
-        deformation = tripyr.tripyr("xcl",True,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50*sf,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
+        deformation = tripyr.tripyr("xcl",True,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,64*sf,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
         objects.append(deformation)
 
     tSubZero = time.time()
@@ -157,7 +163,7 @@ for g in range(1):
 
     t0 = time.time()
     image = calcThicknessMatrix(objects,xRange,yRange) + 10
-    print(time.time()-t0)
+    #print(time.time()-t0)
 
     #Adding gaussian blur
     image = scipy.ndimage.filters.gaussian_filter(image,1*sf)
@@ -170,7 +176,7 @@ for g in range(1):
     plt.show()
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    plt.imsave('/home/z/Documents/pics/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    plt.imsave('/home/z/Documents/projectImages256/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
     plt.close()
 
 
