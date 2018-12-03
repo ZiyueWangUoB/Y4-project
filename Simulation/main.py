@@ -100,9 +100,9 @@ for g in range(1):
     #Generating an test object, let a cube.
 
     #Generate random parameters of the cube
-    aRand = np.random.randint(54*sf,74*sf)
-    bRand = np.random.randint(54*sf,74*sf)
-    cRand = np.random.randint(54*sf,74*sf)
+    aRand = np.random.randint(70*sf,90*sf)
+    bRand = np.random.randint(70*sf,90*sf)
+    cRand = np.random.randint(70*sf,90*sf)
 
     #Generate random numbers for start position
     xPosRandom = np.random.randint(59*sf,70*sf)         #This is to make sure the object stays within the confides of the image!
@@ -163,7 +163,7 @@ for g in range(1):
 
     t0 = time.time()
     image = calcThicknessMatrix(objects,xRange,yRange) + 10
-    #print(time.time()-t0)
+    print(time.time()-t0)
 
     #Adding gaussian blur
     image = scipy.ndimage.filters.gaussian_filter(image,1*sf)
