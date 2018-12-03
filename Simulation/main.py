@@ -11,6 +11,7 @@ import cuboid
 import sphere
 import addDeformation as aD
 import sys
+import random
 
 #Set of functions
 #Function to add noise to the matrix
@@ -33,30 +34,35 @@ def findMaxAndMin(mainObject):
 
 def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
     thicknessMatrix = np.zeros((len(xProbeRange),len(yProbeRange)))
-    minMax = findMaxAndMin(objects[0])      #Calculate the original min and max values for x and y
+    minMax = [findMaxAndMin(objects[i]) for i in range(0,len(objects))]      #Calculate the original min and max values for x and y
     for i in range(len(xProbeRange)):
-        if i < minMax[0][0] or i > minMax[0][1]:
+        if i < minMax[0][0][0] or i > minMax[0][0][1]:
             continue
         for u in range (len(yProbeRange)):
-            if u < minMax[1][0] or u > minMax[1][1]:
+            if u < minMax[0][1][0] or u > minMax[0][1][1]:
                 continue
             #Random probability for the object to rotate during imaging, by a small angle.
-            rotRand = np.random.randint(0,50)
+            rotRand = np.random.randint(0,100)
 
             if rotRand == 1:
                 alphaRand = np.random.randint(0,3)
                 betaRand = np.random.randint(0,3)
                 gammaRand = np.random.randint(0,3)
                 #Also needs to calculate new min and max values for the next loops. 
-                minMax = findMaxAndMin(objects[0])
-            
+                minMax = [findMaxAndMin(objects[i]) for i in range(0,len(objects))]
+                #print(minMax)
+
             for a in range(len(objects)):
+                if i < minMax[a][0][0] or i > minMax[a][0][1] or u < minMax[a][1][0] or u > minMax[a][1][1]:
+                    continue
+
                 thisObject = objects[a]
                 
                 if rotRand == 1:
                     thisObject.alpha = alphaRand
                     thisObject.beta = betaRand
                     thisObject.gamma = gammaRand
+                    #thisObject.doRotation()
                 
                 intersects = thisObject.findIntersectionThickness(thisObject.planes,i,u)
                 if intersects:
@@ -77,9 +83,10 @@ def rotateThroughBy90(objects):
         thisObject.doRotation()
     return objects
 
-xRange = [i for i in range(0,100)]        #100x100 scan for probe, across 100x100
-yRange = [i for i in range(0,100)]
-zRange = [i for i in range(0,100)]
+sf = 1
+xRange = [i for i in range(0,100*sf)]        #100x100 scan for probe, across 100x100
+yRange = [i for i in range(0,100*sf)]
+zRange = [i for i in range(0,100*sf)]
 
 
 for g in range(1):
@@ -87,13 +94,13 @@ for g in range(1):
     #Generating an test object, let a cube.
 
     #Generate random parameters of the cube
-    aRand = np.random.randint(40,50)
-    bRand = np.random.randint(40,50)
-    cRand = np.random.randint(40,50)
+    aRand = np.random.randint(40*sf,60*sf)
+    bRand = np.random.randint(40*sf,60*sf)
+    cRand = np.random.randint(40*sf,60*sf)
 
     #Generate random numbers for start position
-    xPosRandom = np.random.randint(45,56)         #This is to make sure the object stays within the confides of the image!
-    yPosRandom = np.random.randint(45,56)          #Centered at between 45 and 55.
+    xPosRandom = np.random.randint(45*sf,55*sf)         #This is to make sure the object stays within the confides of the image!
+    yPosRandom = np.random.randint(45*sf,55*sf)          #Centered at between 45 and 55.
 
 
     #rRand = np.random.randint(cLMax/10,cLMax/5)
@@ -106,30 +113,37 @@ for g in range(1):
     gammaRand = np.random.randint(0,360)
 
 
-    cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,aRand,bRand,cRand)
+    cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50*sf,xRange,yRange,aRand,bRand,cRand)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
     objects = [cube]
     
+    '''
     if len(sys.argv) > 1:
     #deformations calculated and set here
         deformTheseCorners = sys.argv[2].split(',')
         deformTheseCornersResult = list(map(int,deformTheseCorners))        #Only problem is we can't not deform any corners, which is fine cuz that set has already been done. We can adjust for later tho!
     else:
         deformTheseCornersResult = []
+    '''
+    #Alternate method for randomly generating three corners
+    if len(sys.argv) > 1:
+        deformTheseCornersResult = random.sample(range(0,8),int(sys.argv[2]))
+        print(deformTheseCornersResult)
+    else:
+        deformTheseCornersResult = []
 
-
-    deforms = aD.addDeformation(cube,'cuboid',deformTheseCornersResult)
+    deforms = aD.addDeformation(cube,'cuboid',deformTheseCornersResult,sf)
     dA = deforms.deformArray
 
     #The deformations are tripyr which are created in this loop
     for i in range(len(dA)):
-        deformation = tripyr.tripyr("xcl",True,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
+        deformation = tripyr.tripyr("xcl",True,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,50*sf,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
         objects.append(deformation)
 
     tSubZero = time.time()
     for i in range(len(objects)):
         objects[i].doRotation()
-    print(time.time()-tSubZero)
+    #print(time.time()-tSubZero)
     
    # print(objects)
 
@@ -146,7 +160,7 @@ for g in range(1):
     print(time.time()-t0)
 
     #Adding gaussian blur
-    image = scipy.ndimage.filters.gaussian_filter(image,1)
+    image = scipy.ndimage.filters.gaussian_filter(image,1*sf)
     
     #Adding poisson noise
     addPoissonNoise(image)
@@ -156,7 +170,7 @@ for g in range(1):
     plt.show()
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    #plt.imsave('/home/z/Documents/pics/' + str(sys.argv[3]) + '/image' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    plt.imsave('/home/z/Documents/pics/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
     plt.close()
 
 
