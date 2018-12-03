@@ -13,7 +13,7 @@ import addDeformation as aD
 import sys
 import random
 
-sf = 2
+sf = 1
 
 #Set of functions
 #Function to add noise to the matrix
@@ -173,10 +173,10 @@ for g in range(1):
     #plt.figure(figsize=(5,5))
     plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
     
-    plt.show()
+    #plt.show()
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    plt.imsave('/home/z/Documents/projectImages256/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    plt.imsave('/home/z/Documents/projectImages128/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
     plt.close()
 
 
