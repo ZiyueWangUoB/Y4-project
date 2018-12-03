@@ -100,9 +100,9 @@ for g in range(1):
     #Generating an test object, let a cube.
 
     #Generate random parameters of the cube
-    aRand = np.random.randint(70*sf,90*sf)
-    bRand = np.random.randint(70*sf,90*sf)
-    cRand = np.random.randint(70*sf,90*sf)
+    aRand = np.random.randint(60*sf,70*sf)
+    bRand = np.random.randint(60*sf,70*sf)
+    cRand = np.random.randint(60*sf,70*sf)
 
     #Generate random numbers for start position
     xPosRandom = np.random.randint(59*sf,70*sf)         #This is to make sure the object stays within the confides of the image!
@@ -173,10 +173,11 @@ for g in range(1):
     #plt.figure(figsize=(5,5))
     plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
     
-    #plt.show()
+    plt.show()
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    plt.imsave('/home/z/Documents/projectImages128/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    #plt.imsave('/home/z/Documents/projectImages128/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    plt.savefig('/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
     plt.close()
 
 
