@@ -44,29 +44,29 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
             if u < minMax[0][1][0] or u > minMax[0][1][1]:
                 continue
             #Random probability for the object to rotate during imaging, by a small angle.
-#            rotRand = np.random.randint(0,500)
+            rotRand = np.random.randint(0,500)
 
-            '''
+            
             if rotRand == 1: 
-                alphaRand = np.random.randint(-3,3)*0.2
-                betaRand = np.random.randint(-3,3)*0.2
-                gammaRand = np.random.randint(-3,3)*0.2
+                alphaRand = np.random.randint(-3,3)*0.5
+                betaRand = np.random.randint(-3,3)*0.5
+                gammaRand = np.random.randint(-3,3)*0.5
                 #Also needs to calculate new min and max values for the next loops. 
                 minMax = [findMaxAndMin(objects[i]) for i in range(0,len(objects))]
                 #print(minMax)
-'''
+
 
             for a in range(len(objects)):
                # if a == 0:
                 #    continue
                 thisObject = objects[a]
-                '''
+                
                 if rotRand == 1:
                     thisObject.alpha = alphaRand
                     thisObject.beta = betaRand
                     thisObject.gamma = gammaRand
                     thisObject.doRotation()
-                '''
+                
                 
                 if i < minMax[a][0][0] or i > minMax[a][0][1] or u < minMax[a][1][0] or u > minMax[a][1][1]:
                     continue
@@ -177,7 +177,7 @@ for g in range(1):
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
     #plt.imsave('/home/z/Documents/projectImages128/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
-    plt.savefig('/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
+    #plt.savefig('~/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
     plt.close()
 
 
