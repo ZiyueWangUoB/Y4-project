@@ -13,15 +13,35 @@ import addDeformation as aD
 import sys
 import random
 
-sf = 1
+sf = 2
+
+#Let N be the number of events at each pixel, where the total is a constant. Or just keep N a factor? So as we jump from 128 to 256, sf = 2 from 1, then N per pixel will drop by 4. 
+#To start off then, let's set N to 8 (so max we can go is 1024 -> 512 - > 256 -> 128)
+N = 16/sf/sf
+#Scales with sf (scale factor). Will reach min at when 1 at 1024 (as this scales with 1/sf^2)
 
 #Set of functions
 #Function to add noise to the matrix
 def addPoissonNoise(Matrix):
+    #Poisson noise is singal dependent!
+    noise_mask = np.random.poisson(Matrix)
+    return noise_mask+Matrix
+    
+    '''
+    #imageplusnoise = np.random.poisson(lam=Matrix, size=None)
+    #imageplusnoise.shape
+    #return imageplusnoise
+    '''
+    
+    
+    '''
     for i in range(len(xRange)):
         for u in range (len(yRange)):
-            noise = np.random.poisson(5*sf)            #How big should the noise be? Any ideas? #relative to mean intensity
+            noise = np.random.poisson(math.sqrt(N))            #How big should the noise be? Any ideas? #relative to mean intensity
             Matrix[i][u] += noise
+    
+    return Matrix
+    '''
 
 def findMaxAndMin(mainObject):
     corners = mainObject.corners
@@ -61,11 +81,13 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
                 #    continue
                 thisObject = objects[a]
                 
+                '''
                 if rotRand == 1:
                     thisObject.alpha = alphaRand
                     thisObject.beta = betaRand
                     thisObject.gamma = gammaRand
                     thisObject.doRotation()
+                    '''
                 
                 
                 if i < minMax[a][0][0] or i > minMax[a][0][1] or u < minMax[a][1][0] or u > minMax[a][1][1]:
@@ -90,9 +112,10 @@ def rotateThroughBy90(objects):
         thisObject.doRotation()
     return objects
 
-xRange = [i for i in range(0,128*sf)]        #100x100 scan for probe, across 100x100
-yRange = [i for i in range(0,128*sf)]
-zRange = [i for i in range(0,128*sf)]
+xRange = [i for i in range(0,int(128*sf))]        #100x100 scan for probe, across 100x100
+yRange = [i for i in range(0,int(128*sf))]
+zRange = [i for i in range(0,int(128*sf))]
+
 
 
 for g in range(1):
@@ -137,7 +160,7 @@ for g in range(1):
         #print(deformTheseCornersResult)
     else:
         deformTheseCornersResult = []
-
+    print(deformTheseCornersResult)
     deforms = aD.addDeformation(cube,'cuboid',deformTheseCornersResult,sf)
     dA = deforms.deformArray
 
@@ -162,21 +185,26 @@ for g in range(1):
 	#We can call the function once here as a preliminary, and call again during the loop?
 
     t0 = time.time()
-    image = calcThicknessMatrix(objects,xRange,yRange) + 10
-    print(time.time()-t0)
 
+    flatBackground = 30*sf              #Flat background from the carbon layer. For now background will scale with scale factor
+    image = (calcThicknessMatrix(objects,xRange,yRange) + flatBackground)*N               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column 
+    print(time.time()-t0)
     #Adding gaussian blur
-    image = scipy.ndimage.filters.gaussian_filter(image,1*sf)
+    image = scipy.ndimage.filters.gaussian_filter(image,sigma=2)
     
     #Adding poisson noise
-    addPoissonNoise(image)
+    image = addPoissonNoise(image)
     #plt.figure(figsize=(5,5))
+    
+    print(image[0][0])
+    print(np.amax(image))
+    
     plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
     
-    #plt.show()
+    plt.show()
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    plt.imsave('/home/z/Documents/projectImages128/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    #plt.imsave('/home/z/Documents/projectImages128/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
     #plt.savefig('~/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
     plt.close()
 
