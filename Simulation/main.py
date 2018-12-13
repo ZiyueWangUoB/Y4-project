@@ -13,7 +13,7 @@ import addDeformation as aD
 import sys
 import random
 
-sf = 2
+sf = 1
 
 #Let N be the number of events at each pixel, where the total is a constant. Or just keep N a factor? So as we jump from 128 to 256, sf = 2 from 1, then N per pixel will drop by 4. 
 #To start off then, let's set N to 8 (so max we can go is 1024 -> 512 - > 256 -> 128)
@@ -26,22 +26,6 @@ def addPoissonNoise(Matrix):
     #Poisson noise is singal dependent!
     noise_mask = np.random.poisson(Matrix)
     return noise_mask+Matrix
-    
-    '''
-    #imageplusnoise = np.random.poisson(lam=Matrix, size=None)
-    #imageplusnoise.shape
-    #return imageplusnoise
-    '''
-    
-    
-    '''
-    for i in range(len(xRange)):
-        for u in range (len(yRange)):
-            noise = np.random.poisson(math.sqrt(N))            #How big should the noise be? Any ideas? #relative to mean intensity
-            Matrix[i][u] += noise
-    
-    return Matrix
-    '''
 
 def findMaxAndMin(mainObject):
     corners = mainObject.corners
@@ -52,8 +36,8 @@ def findMaxAndMin(mainObject):
     minY = np.amin(newArray[1])
     maxY = np.amax(newArray[1])
     return [(minX,maxX), (minY,maxY)]
-    
 
+'''
 def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
     thicknessMatrix = np.zeros((len(xProbeRange),len(yProbeRange)))
     minMax = [findMaxAndMin(objects[i]) for i in range(0,len(objects))]      #Calculate the original min and max values for x and y
@@ -81,14 +65,6 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
                 #    continue
                 thisObject = objects[a]
                 
-                '''
-                if rotRand == 1:
-                    thisObject.alpha = alphaRand
-                    thisObject.beta = betaRand
-                    thisObject.gamma = gammaRand
-                    thisObject.doRotation()
-                    '''
-                
                 
                 if i < minMax[a][0][0] or i > minMax[a][0][1] or u < minMax[a][1][0] or u > minMax[a][1][1]:
                     continue
@@ -102,7 +78,13 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
         # print(thicknessMatrix[50][50])
 
     return thicknessMatrix
+'''
 
+def calcThicknessMatrix(objects)
+
+
+
+'''
 def rotateThroughBy90(objects):
     for a in range(len(objects)):
         thisObject = objects[a]
@@ -111,6 +93,8 @@ def rotateThroughBy90(objects):
         thisObject.gamma = 1
         thisObject.doRotation()
     return objects
+    
+'''
 
 xRange = [i for i in range(0,int(128*sf))]        #100x100 scan for probe, across 100x100
 yRange = [i for i in range(0,int(128*sf))]
@@ -146,6 +130,7 @@ for g in range(1):
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
     objects = [cube]
     
+    
     '''
     if len(sys.argv) > 1:
     #deformations calculated and set here
@@ -161,6 +146,9 @@ for g in range(1):
     else:
         deformTheseCornersResult = []
     print(deformTheseCornersResult)
+
+
+
     deforms = aD.addDeformation(cube,'cuboid',deformTheseCornersResult,sf)
     dA = deforms.deformArray
 
@@ -190,7 +178,7 @@ for g in range(1):
     image = (calcThicknessMatrix(objects,xRange,yRange) + flatBackground)*N               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column 
     print(time.time()-t0)
     #Adding gaussian blur
-    image = scipy.ndimage.filters.gaussian_filter(image,sigma=2)
+    image = scipy.ndimage.filters.gaussian_filter(image,sigma=1)
     
     #Adding poisson noise
     image = addPoissonNoise(image)

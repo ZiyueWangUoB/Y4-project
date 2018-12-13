@@ -27,13 +27,19 @@ class cuboid(object.objectType):
 
 
     def generatePlanes(self):            #this is specific for the cuboid shape
-        p1 = self.findPlane(self.corners[0],self.corners[1],self.corners[2],self.corners[3])            #Does direction of n matter? find out later
-        p2 = self.findPlane(self.corners[4],self.corners[5],self.corners[0],self.corners[1])            #Goes in line with our diagram, consistent throughout. Normal vector direction doesn't matter. 
-        p3 = self.findPlane(self.corners[4],self.corners[0],self.corners[6],self.corners[2])            #This consistency will allow us to work with finding whether the intersection
-        p4 = self.findPlane(self.corners[2],self.corners[3],self.corners[6],self.corners[7])            #is within the bounded plane or not!
-        p5 = self.findPlane(self.corners[5],self.corners[4],self.corners[7],self.corners[6])
-        p6 = self.findPlane(self.corners[1],self.corners[5],self.corners[3],self.corners[7])
-        return [p1,p2,p3,p4,p5,p6]
+        p11 = self.findPlane(self.corners[0],self.corners[1],self.corners[2])            #Does direction of n matter? find out later
+        p12 = self.findPlane(self.corners[3],self.corners[2],self.corners[1])
+        p21 = self.findPlane(self.corners[4],self.corners[5],self.corners[0])            #Goes in line with our diagram, consistent throughout. Normal vector direction doesn't matter.
+        p22 = self.findPlane(self.corners[1],self.corners[0],self.corners[5])
+        p31 = self.findPlane(self.corners[4],self.corners[0],self.corners[6])            #This consistency will allow us to work with finding whether the intersection
+        p32 = self.findPlane(self.corners[2],self.corners[6],self.corners[0])
+        p41 = self.findPlane(self.corners[2],self.corners[3],self.corners[6])            #is within the bounded plane or not!
+        p42 = self.findPlane(self.corners[7],self.corners[6],self.corners[3])
+        p51 = self.findPlane(self.corners[5],self.corners[4],self.corners[7])
+        p52 = self.findPlane(self.corners[6],self.corners[7],self.corners[4])
+        p61 = self.findPlane(self.corners[1],self.corners[5],self.corners[3])
+        p62 = self.findPlane(self.corners[7],self.corners[3],self.corners[5])
+        return [p11,p12,p21,p22,p31,p32,p41,p42,p51,p52,p61,p62]
     
     def calculateCornerPosition(self,a,b,c):
         
@@ -56,6 +62,7 @@ class cuboid(object.objectType):
     def rotateCorners(self,xPos,yPos,zPos):
         #print(('this is gamma') + str(self.gamma))
         #Rotating corners also rotates the axis!
+        #Need "Euler angles" - Phi will be greater if theta is greater e.t.c.
         centre = [xPos,yPos,zPos]
         alphaQuaternion = Quaternion(axis= self.yAxis, angle = self.alpha*math.pi/180)               #bare in mind rotations in y is inverted to what we think - refer to notebook. X and z axis rotation is same as in diagrams
         self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'y',self.alpha)
@@ -77,8 +84,3 @@ class cuboid(object.objectType):
     def doRotation(self):
         self.rotateCorners(self.xPos,self.yPos,self.zPos)
         self.planes = self.generatePlanes()          #Up to planes is still working, rotation is intact
-
-    
-
-
-

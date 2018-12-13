@@ -24,13 +24,7 @@ class tripyr(object.objectType):
         self.zAxis = np.array([0,0,1])
         self.deformation = deformation
         self.planes = self.generatePlanes(self.corners)
-        
-    def findPlane(self,c1,c2,c3): #This is generic for any plane
-        vector12 = c2 - c1
-        vector13 = c3 - c1
-        n = np.cross(vector12,vector13)
-        nNorm = n/np.linalg.norm(n)
-        return nNorm, c1, c2, c3
+    
     
     def doRotation(self):
         corners = self.rotateCorners(self.corners,self.xPos,self.yPos,self.zPos)

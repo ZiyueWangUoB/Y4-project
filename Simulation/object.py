@@ -25,12 +25,12 @@ class objectType:
         self.yProbeRange = yProbeRange
 #Add future function here to calculate tilt, just stating variables for now
     #def findThickness(self)
-    def findPlane(self,c1,c2,c3,c4): #This is generic for any plane
+    def findPlane(self,c1,c2,c3): #This is generic for any plane
         vector12 = c2 - c1
         vector13 = c3 - c1
         n = np.cross(vector12,vector13)
         nNorm = n/np.linalg.norm(n)
-        return nNorm, c1, c2, c3, c4            #Returns the normal vector alongside a point on that vector
+        return nNorm, c1, c2, c3            #Returns the normal vector alongside a point on that vector
     
     def findIntersectionThickness(self,planes,xProbePos,yProbePos):
         #To find the intersection, we break down the dot product algebra in order to rearrange for an equation to solve t. Computers can't do maths yo.
