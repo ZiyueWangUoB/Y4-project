@@ -1,6 +1,7 @@
 #31/10/2018 :w
 
-#This is the main file where most stuff is done. Classes will be written as their own modules yeah. 
+#This is the main file where most stuff is done. Classes will be written as their own modules yeah.
+#Nothing really to update, just putting something in to push lol
 import matplotlib.pyplot as plt
 import scipy.ndimage.filters
 import math
