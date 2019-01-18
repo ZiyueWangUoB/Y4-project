@@ -38,7 +38,7 @@ def findMaxAndMin(mainObject):
     maxY = np.amax(newArray[1])
     return [(minX,maxX), (minY,maxY)]
 
-'''
+
 def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
     thicknessMatrix = np.zeros((len(xProbeRange),len(yProbeRange)))
     minMax = [findMaxAndMin(objects[i]) for i in range(0,len(objects))]      #Calculate the original min and max values for x and y
@@ -79,25 +79,8 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
         # print(thicknessMatrix[50][50])
 
     return thicknessMatrix
-'''
 
-def calcThicknessMatrix(objects)
-
-
-
-'''
-def rotateThroughBy90(objects):
-    for a in range(len(objects)):
-        thisObject = objects[a]
-        thisObject.alpha = 1
-        thisObject.beta = 1
-        thisObject.gamma = 1
-        thisObject.doRotation()
-    return objects
-    
-'''
-
-xRange = [i for i in range(0,int(128*sf))]        #100x100 scan for probe, across 100x100
+xRange = [i for i in range(0,int(128*sf))]        #128x128 scan for probe, across 100x100
 yRange = [i for i in range(0,int(128*sf))]
 zRange = [i for i in range(0,int(128*sf))]
 
@@ -183,14 +166,14 @@ for g in range(1):
     
     #Adding poisson noise
     image = addPoissonNoise(image)
-    #plt.figure(figsize=(5,5))
+    plt.figure(figsize=(5,5))
     
     print(image[0][0])
     print(np.amax(image))
     
     plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
     
-    plt.show()
+    #plt.show()
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
     #plt.imsave('/home/z/Documents/projectImages128/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
