@@ -38,7 +38,7 @@ def findMaxAndMin(mainObject):
     maxY = np.amax(newArray[1])
     return [(minX,maxX), (minY,maxY)]
 
-
+'''
 def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
     thicknessMatrix = np.zeros((len(xProbeRange),len(yProbeRange)))
     minMax = [findMaxAndMin(objects[i]) for i in range(0,len(objects))]      #Calculate the original min and max values for x and y
@@ -79,6 +79,25 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
         # print(thicknessMatrix[50][50])
 
     return thicknessMatrix
+'''
+
+def calc_thickness_matrix(objects,x_pixels,y_pixels,dxdt=0,dydt=0,n,a, pixel_size=1):
+	#n is scan points, a is pixel size
+	a = np.arrange(0,n)-n//2
+	x,y = np.meshgrid(a*pixel_size, a*pixel_size)
+    if dxdt != 0 or dydt != 0:
+        t = np.arrange(x.size)
+        p_arr = np.stack([x.flatten() + t*dxdt, y.flatten() + t*dydt, np.zeros(n*n)]).T
+    else:
+        p_arr = np.stack([x.flatten(),y.flatten(),np.zeros(n*n)]).T
+    #This takes all the pixels and displays the x,y,z locations as tuples. By definition, it's a 16384x3 matrix. Each of the pixels (16384) contains it's x, y and z coordinates.
+    
+
+
+
+x_pixels, y_pixels = 128, 128		#128x128 pixels
+
+
 
 xRange = [i for i in range(0,int(128*sf))]        #128x128 scan for probe, across 100x100
 yRange = [i for i in range(0,int(128*sf))]
