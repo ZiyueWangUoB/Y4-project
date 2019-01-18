@@ -79,19 +79,36 @@ def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
         # print(thicknessMatrix[50][50])
 
     return thicknessMatrix
-'''
 
-def calc_thickness_matrix(objects,x_pixels,y_pixels,dxdt=0,dydt=0,n,a, pixel_size=1):
-	#n is scan points, a is pixel size
-	a = np.arrange(0,n)-n//2
-	x,y = np.meshgrid(a*pixel_size, a*pixel_size)
+'''
+def intersect_heights(p_arr, plane):
+    #print(plane[0])
+    #print('fart')
+
+
+def calc_thickness_matrix(objects,x_pixels,y_pixels,n,dxdt=0,dydt=0,pixel_size=1):       #n is scan points, a is pixel size
+    a = np.arange(0,n)-n//2
+    x,y = np.meshgrid(a*pixel_size, a*pixel_size)
     if dxdt != 0 or dydt != 0:
         t = np.arrange(x.size)
         p_arr = np.stack([x.flatten() + t*dxdt, y.flatten() + t*dydt, np.zeros(n*n)]).T
     else:
         p_arr = np.stack([x.flatten(),y.flatten(),np.zeros(n*n)]).T
     #This takes all the pixels and displays the x,y,z locations as tuples. By definition, it's a 16384x3 matrix. Each of the pixels (16384) contains it's x, y and z coordinates.
-    
+    thickn = np.zeros((len(objects),p_arr.shape[0]))
+    print(len(objects))
+    for o in objects:       #for each of the individual objects
+        planes = o.planes
+        for k, p in enumerate(planes):         #k is the iterator, t is the element within objects
+            #for each object's plane
+            thickn[k,:] = intersect_heights(p_arr,p)
+
+
+
+
+
+
+
 
 
 
@@ -106,7 +123,8 @@ zRange = [i for i in range(0,int(128*sf))]
 
 
 for g in range(1):
-
+    n = 128
+    a =1
     #Generating an test object, let a cube.
 
     #Generate random parameters of the cube
@@ -161,15 +179,8 @@ for g in range(1):
         objects.append(deformation)
 
     tSubZero = time.time()
-    for i in range(len(objects)):
+    for i in range(len(objects)):           #We tell all the objects to rotate one by one
         objects[i].doRotation()
-    #print(time.time()-tSubZero)
-    
-   # print(objects)
-
-   # file = open('cube orientations.txt', 'w')
-   # file.write(str(dA[:][0]))
-   # file.close()
 
 
 	#Need to use function to find the optimal area for the probe to operate. Does this interfere with the rotations while moving? If so how to fix. 
@@ -178,7 +189,7 @@ for g in range(1):
     t0 = time.time()
 
     flatBackground = 30*sf              #Flat background from the carbon layer. For now background will scale with scale factor
-    image = (calcThicknessMatrix(objects,xRange,yRange) + flatBackground)*N               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column 
+    image = (calc_thickness_matrix(objects,xRange,yRange,n) + flatBackground)*N               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column 
     print(time.time()-t0)
     #Adding gaussian blur
     image = scipy.ndimage.filters.gaussian_filter(image,sigma=1)

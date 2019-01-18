@@ -33,7 +33,7 @@ def intersect_heights(p_arr,tri):
     d = np.array([[0,0,1]])     #vector for the STEM microscope beam.
     b = np.inner(normal, d)     # b == 0 means no intersection
     g = p_arr-v0
-    print(g[0])
+    #print(g[0])
     #print(v0.shape)
     a = np.inner(normal, g)            #Figues out the height apparently, leave it.
     #print(a.shape)
@@ -97,18 +97,20 @@ class Convex:
     def thickness(self, p_arr):
         """ thickness along z direction """
         thickn = np.zeros((self.triangles.shape[0], p_arr.shape[0]))
+        #print(self.triangles)
         #Each triangle (first indent) has 3 vertexes with 3 cord for each vertex. 2nd indent is the vertex num. 3rd indent is cords x,y,z detail.
         #thickn is 4x16384 matrix detailing all the thickness matrix for each of the triangles.
         for k, t in enumerate(self.triangles):
-            #print(k,t)
+            #print(t)
             #t is the 3x3 matrix for each of the triangles (contains info on vertex cords for each vertex) and k is the triangle number (4 triangles in total in this case)
             thickn[k,:] = intersect_heights(p_arr,t)                #Instead of giving the calc thickness one pixel at a time, It gives it the whole image and calculates it in one go???
-        print(thickn.shape)
-        t = np.nanmax(thickn, axis=0)-np.nanmin(thickn, axis=0)
+        #print(thickn.shape)
+        thicknessMatrix = np.nanmax(thickn, axis=0)-np.nanmin(thickn, axis=0)
+        print(thicknessMatrix.shape)
         #t[np.isnan(t)] = 0
         if np.isnan(t):
             t = 0
-        return t
+        return thicknessMatrix
 
 
 if __name__ == '__main__':
