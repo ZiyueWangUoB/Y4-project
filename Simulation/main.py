@@ -18,7 +18,6 @@ sf = 1
 
 #Let N be the number of events at each pixel, where the total is a constant. Or just keep N a factor? So as we jump from 128 to 256, sf = 2 from 1, then N per pixel will drop by 4. 
 #To start off then, let's set N to 8 (so max we can go is 1024 -> 512 - > 256 -> 128)
-N = 16/sf/sf
 #Scales with sf (scale factor). Will reach min at when 1 at 1024 (as this scales with 1/sf^2)
 
 #Set of functions
@@ -40,6 +39,7 @@ def findMaxAndMin(mainObject):
 
 def intersect_heights(p_arr, tri):
     norm,v0,v1,v2 = tri
+    print(v0)
     u = v1-v0
     v = v2-v0
     d = np.array([[0,0,1]])           #This is the ray from the beam
@@ -47,7 +47,11 @@ def intersect_heights(p_arr, tri):
     g = p_arr-v0            #Vector from every pixel to the vertex v0
     a = np.inner(norm,g)        #a factor
     h = -a/b
-    
+    ustar = np.cross(u, norm)
+    vstar = np.cross(v, norm)
+    c1 = np.inner((p_arr - v0 + (h*d.T).T), ustar)/np.inner(v, ustar)
+    c2 = np.inner((p_arr - v0 + (h*d.T).T), vstar)/np.inner(u, vstar)
+    h[(c1<0)+(c2<0)+(c1+c2>1)+(b==0)] = 0
     #Works out if intersection is within triangle
     return h
 
@@ -66,22 +70,25 @@ def calc_thickness_matrix(objects,n,dxdt=0,dydt=0,pixel_size=1):       #n is sca
         planes = o.planes   #For cuboid there is 12 planes as I converted each plane to two triangles
         thickn = np.zeros((len(planes),p_arr.shape[0]))
         for k, tri in enumerate(planes):         #k is the iterator, t is the element within objects
+            if k != 0:
+                continue
             #print(tri)
             thickn[k,:] = intersect_heights(p_arr,tri)
+            u = thickn[k,:]
+            z = u.reshape(n,n)
+            print(type(z[32][:]))
+            print(type(z[33][32]),z[32][32])
+            #np.savetxt("debug" + str(k) + ".csv", z, delimiter=",")
+            
         thickness_mat = np.nanmax(thickn, axis=0)-np.nanmin(thickn, axis=0)
         if o.deformation:
-            thick_array -= thickness_mat        #if it is deformation, we minus the array
+            #thick_array -= thickness_mat        #if it is deformation, we minus the array
+            thick_array += thickness_mat            #Temporary for testing deformations
         else:
             thick_array += thickness_mat
-    thick_array.flatten()
-    print(thick_array.shape)
+    j = -np.sort(-thick_array)
     t_mat = thick_array.reshape(n,n)
-    print(t_mat.shape)
     return t_mat
-
-
-
-
 
 
 
@@ -96,10 +103,10 @@ yRange = [i for i in range(0,int(128*sf))]
 zRange = [i for i in range(0,int(128*sf))]
 
 
-
+t0 = time.time()
 for g in range(1):
     n = 128
-    a =1
+    a = 1
     #Generating an test object, let a cube.
 
     #Generate random parameters of the cube
@@ -108,8 +115,8 @@ for g in range(1):
     cRand = np.random.randint(60*sf,70*sf)
 
     #Generate random numbers for start position
-    xPosRandom = np.random.randint(59*sf,70*sf)         #This is to make sure the object stays within the confides of the image!
-    yPosRandom = np.random.randint(59*sf,70*sf)          #Centered at between 45 and 55.
+    xPosRandom = np.random.randint(-5*sf,5*sf)         #This is to make sure the object stays within the confides of the image!
+    yPosRandom = np.random.randint(-5*sf,5*sf)          #Centered at between 45 and 55.
 
 
     #rRand = np.random.randint(cLMax/10,cLMax/5)
@@ -122,11 +129,10 @@ for g in range(1):
     gammaRand = np.random.randint(0,360)
 
 
-    cube = cuboid.cuboid("cmj",False,0,0,0,xPosRandom,yPosRandom,64*sf,xRange,yRange,aRand,bRand,cRand)
-    print(cube.corners)
+    cube = cuboid.cuboid("cmj",False,0,0,0,0,0,0,xRange,yRange,64,64,64)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
-    objects = [cube]
-    
+    #objects = [cube]
+    objects=[]
     
     '''
     if len(sys.argv) > 1:
@@ -149,7 +155,7 @@ for g in range(1):
 
     #The deformations are tripyr which are created in this loop
     for i in range(len(dA)):
-        deformation = tripyr.tripyr("xcl",True,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,64*sf,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
+        deformation = tripyr.tripyr("xcl",True,0,0,0,0,0,0,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
         objects.append(deformation)
 
     tSubZero = time.time()
@@ -159,28 +165,27 @@ for g in range(1):
 	#Need to use function to find the optimal area for the probe to operate. Does this interfere with the rotations while moving? If so how to fix. 
 	#We can call the function once here as a preliminary, and call again during the loop?
 
-    t0 = time.time()
 
-    flatBackground = 30*sf              #Flat background from the carbon layer. For now background will scale with scale factor
-    image = (calc_thickness_matrix(objects,n) + flatBackground)*N               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
-    print(time.time()-t0)
+    flatBackground = 0              #Flat background from the carbon layer. For now background will scale with scale factor
+    image = (calc_thickness_matrix(objects,n) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
-    image = scipy.ndimage.filters.gaussian_filter(image,sigma=1)
-    
+#image = scipy.ndimage.filters.gaussian_filter(image,sigma=2)
+
+    np.asmatrix(image)
     #Adding poisson noise
-    image = addPoissonNoise(image)
+#image = addPoissonNoise(image)
     plt.figure(figsize=(5,5))
     
-    print(image[0][0])
-    print(np.amax(image))
-    
-    plt.pcolormesh(xRange, yRange, image, cmap="Greys_r")
-    
-    #plt.show()
+    plt.pcolormesh(xRange, yRange, image, cmap="gray")
+#print(image[34][34]-image[33][33])
+#np.savetxt("debug.csv", image, delimiter=",")
+
+    plt.show()
+    print(time.time()-t0)
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
     #plt.imsave('/home/z/Documents/projectImages128/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
     #plt.savefig('~/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
-    plt.close()
+    #plt.close()
 
 

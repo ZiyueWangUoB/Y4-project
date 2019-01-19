@@ -52,8 +52,8 @@ class cuboid(object.objectType):
         c7 = np.array([-a/2,b/2,c/2])
         c8 = np.array([a/2,b/2,c/2])
         corners = [c1,c2,c3,c4,c5,c6,c7,c8] 
-        #for i in range(len(corners)):
-            #corners[i] += np.array([self.xPos,self.yPos,self.zPos])
+        for i in range(len(corners)):
+            corners[i] += np.array([self.xPos,self.yPos,self.zPos])
         return corners     #corners are set in the way sketched in notebook, will include diagram later
         
     #def        #We need to write a function here that resets the object back to the 0,0,0 centre, for rotations, then pushes it back to original location

@@ -39,10 +39,12 @@ class addDeformation:
     def cornerDeformation(self,vcorn,cornerNum,sf):
         
         c1 = self.corners[cornerNum]
-        a = np.random.randint(20*sf,30*sf)              #Make these randomly generate later
-        b = np.random.randint(20*sf,30*sf)
-        c = np.random.randint(20*sf,30*sf)
-        
+        #a = np.random.randint(20*sf,30*sf)              #Make these randomly generate later
+        #b = np.random.randint(20*sf,30*sf)
+        #c = np.random.randint(20*sf,30*sf)
+        a = 10
+        b = 10
+        c = 10
         #a = 50*sf
         #b = 50*sf
         #c = 50*sf
@@ -53,13 +55,7 @@ class addDeformation:
         c4 = c1 + c*vcorn[2]
         return c1,c2,c3,c4
     
-    
-    
-    
-    
-    
-    
-    
+
     def findAxisCuboid(self,corners):
         v = [[[] for x in range(8)] for y in range(8)]
         vcorn = [[[] for x in range(3)] for y in range(8)]
