@@ -38,55 +38,21 @@ def findMaxAndMin(mainObject):
     maxY = np.amax(newArray[1])
     return [(minX,maxX), (minY,maxY)]
 
-'''
-def calcThicknessMatrix(objects,xProbeRange,yProbeRange):
-    thicknessMatrix = np.zeros((len(xProbeRange),len(yProbeRange)))
-    minMax = [findMaxAndMin(objects[i]) for i in range(0,len(objects))]      #Calculate the original min and max values for x and y
-    for i in range(len(xProbeRange)):
-        if i < minMax[0][0][0] or i > minMax[0][0][1]:
-            continue
-        for u in range (len(yProbeRange)):
-            if u < minMax[0][1][0] or u > minMax[0][1][1]:
-                continue
-            #Random probability for the object to rotate during imaging, by a small angle.
-            rotRand = np.random.randint(0,500)
-
-            
-            if rotRand == 1: 
-                alphaRand = np.random.randint(-3,3)*0.5
-                betaRand = np.random.randint(-3,3)*0.5
-                gammaRand = np.random.randint(-3,3)*0.5
-                #Also needs to calculate new min and max values for the next loops. 
-                minMax = [findMaxAndMin(objects[i]) for i in range(0,len(objects))]
-                #print(minMax)
+def intersect_heights(p_arr, tri):
+    norm,v0,v1,v2 = tri
+    u = v1-v0
+    v = v2-v0
+    d = np.array([[0,0,1]])           #This is the ray from the beam
+    b = np.inner(norm,d)            #b==0 means n o intersection
+    g = p_arr-v0            #Vector from every pixel to the vertex v0
+    a = np.inner(norm,g)        #a factor
+    h = -a/b
+    
+    #Works out if intersection is within triangle
+    return h
 
 
-            for a in range(len(objects)):
-               # if a == 0:
-                #    continue
-                thisObject = objects[a]
-                
-                
-                if i < minMax[a][0][0] or i > minMax[a][0][1] or u < minMax[a][1][0] or u > minMax[a][1][1]:
-                    continue
-                
-                intersects = thisObject.findIntersectionThickness(thisObject.planes,i,u)
-                if intersects:
-                    if not thisObject.deformation:
-                        thicknessMatrix[i][u] += intersects                              #Outputs the intersects on thickness matrix!
-                    else:
-                        thicknessMatrix[i][u] -= intersects
-        # print(thicknessMatrix[50][50])
-
-    return thicknessMatrix
-
-'''
-def intersect_heights(p_arr, plane):
-    #print(plane[0])
-    #print('fart')
-
-
-def calc_thickness_matrix(objects,x_pixels,y_pixels,n,dxdt=0,dydt=0,pixel_size=1):       #n is scan points, a is pixel size
+def calc_thickness_matrix(objects,n,dxdt=0,dydt=0,pixel_size=1):       #n is scan points, a is pixel size
     a = np.arange(0,n)-n//2
     x,y = np.meshgrid(a*pixel_size, a*pixel_size)
     if dxdt != 0 or dydt != 0:
@@ -95,14 +61,23 @@ def calc_thickness_matrix(objects,x_pixels,y_pixels,n,dxdt=0,dydt=0,pixel_size=1
     else:
         p_arr = np.stack([x.flatten(),y.flatten(),np.zeros(n*n)]).T
     #This takes all the pixels and displays the x,y,z locations as tuples. By definition, it's a 16384x3 matrix. Each of the pixels (16384) contains it's x, y and z coordinates.
-    thickn = np.zeros((len(objects),p_arr.shape[0]))
-    print(len(objects))
+    thick_array = np.zeros(p_arr.shape[0])
     for o in objects:       #for each of the individual objects
-        planes = o.planes
-        for k, p in enumerate(planes):         #k is the iterator, t is the element within objects
-            #for each object's plane
-            thickn[k,:] = intersect_heights(p_arr,p)
-
+        planes = o.planes   #For cuboid there is 12 planes as I converted each plane to two triangles
+        thickn = np.zeros((len(planes),p_arr.shape[0]))
+        for k, tri in enumerate(planes):         #k is the iterator, t is the element within objects
+            #print(tri)
+            thickn[k,:] = intersect_heights(p_arr,tri)
+        thickness_mat = np.nanmax(thickn, axis=0)-np.nanmin(thickn, axis=0)
+        if o.deformation:
+            thick_array -= thickness_mat        #if it is deformation, we minus the array
+        else:
+            thick_array += thickness_mat
+    thick_array.flatten()
+    print(thick_array.shape)
+    t_mat = thick_array.reshape(n,n)
+    print(t_mat.shape)
+    return t_mat
 
 
 
@@ -147,7 +122,8 @@ for g in range(1):
     gammaRand = np.random.randint(0,360)
 
 
-    cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,64*sf,xRange,yRange,aRand,bRand,cRand)
+    cube = cuboid.cuboid("cmj",False,0,0,0,xPosRandom,yPosRandom,64*sf,xRange,yRange,aRand,bRand,cRand)
+    print(cube.corners)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
     objects = [cube]
     
@@ -166,8 +142,6 @@ for g in range(1):
         #print(deformTheseCornersResult)
     else:
         deformTheseCornersResult = []
-    print(deformTheseCornersResult)
-
 
 
     deforms = aD.addDeformation(cube,'cuboid',deformTheseCornersResult,sf)
@@ -182,14 +156,13 @@ for g in range(1):
     for i in range(len(objects)):           #We tell all the objects to rotate one by one
         objects[i].doRotation()
 
-
 	#Need to use function to find the optimal area for the probe to operate. Does this interfere with the rotations while moving? If so how to fix. 
 	#We can call the function once here as a preliminary, and call again during the loop?
 
     t0 = time.time()
 
     flatBackground = 30*sf              #Flat background from the carbon layer. For now background will scale with scale factor
-    image = (calc_thickness_matrix(objects,xRange,yRange,n) + flatBackground)*N               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column 
+    image = (calc_thickness_matrix(objects,n) + flatBackground)*N               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     print(time.time()-t0)
     #Adding gaussian blur
     image = scipy.ndimage.filters.gaussian_filter(image,sigma=1)

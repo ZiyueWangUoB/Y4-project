@@ -47,6 +47,7 @@ def intersect_heights(p_arr,tri):
     h[(c1<0)+(c2<0)+(c1+c2>1)+(b==0)] = np.nan    # + serves as OR in this context
     
     #How does this essentially differ from my code? The whole pixel array is inputed into this function, specifying the coordinates of each pixel as a tuple. The height is then worked out for each individual pixel location simultaniously. Then it's determined whether it is inside. This is looped over (for loop) for all the individual objects.
+    print(h.shape)
     return h
    
     
@@ -104,9 +105,9 @@ class Convex:
             #print(t)
             #t is the 3x3 matrix for each of the triangles (contains info on vertex cords for each vertex) and k is the triangle number (4 triangles in total in this case)
             thickn[k,:] = intersect_heights(p_arr,t)                #Instead of giving the calc thickness one pixel at a time, It gives it the whole image and calculates it in one go???
-        #print(thickn.shape)
+        print(thickn.shape)
         thicknessMatrix = np.nanmax(thickn, axis=0)-np.nanmin(thickn, axis=0)
-        print(thicknessMatrix.shape)
+       # print(thicknessMatrix.shape)
         #t[np.isnan(t)] = 0
         if np.isnan(t):
             t = 0
