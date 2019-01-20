@@ -3,7 +3,7 @@ cd /home/z/Documents/Y4projects/Simulation/
 
 
 printf "Progress, please wait"
-for ((a = 902; a < 1000; a++))
+for ((a = 0; a < 10000; a++))
 do 
 	python3 main.py $a $1 $2 
 	printf $a
