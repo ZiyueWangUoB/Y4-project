@@ -39,7 +39,6 @@ def findMaxAndMin(mainObject):
 
 def intersect_heights(p_arr, tri):
     norm,v0,v1,v2 = tri
-    print(v0)
     u = v1-v0
     v = v2-v0
     d = np.array([[0,0,1]])           #This is the ray from the beam
@@ -51,7 +50,7 @@ def intersect_heights(p_arr, tri):
     vstar = np.cross(v, norm)
     c1 = np.inner((p_arr - v0 + (h*d.T).T), ustar)/np.inner(v, ustar)
     c2 = np.inner((p_arr - v0 + (h*d.T).T), vstar)/np.inner(u, vstar)
-    h[(c1<0)+(c2<0)+(c1+c2>1)+(b==0)] = 0
+    h[(c1<0)+(c2<0)+(c1+c2>1)+(b==0)] = np.nan       #we can't let 0 - 0
     #Works out if intersection is within triangle
     return h
 
@@ -70,15 +69,10 @@ def calc_thickness_matrix(objects,n,dxdt=0,dydt=0,pixel_size=1):       #n is sca
         planes = o.planes   #For cuboid there is 12 planes as I converted each plane to two triangles
         thickn = np.zeros((len(planes),p_arr.shape[0]))
         for k, tri in enumerate(planes):         #k is the iterator, t is the element within objects
-            if k != 0:
-                continue
             #print(tri)
             thickn[k,:] = intersect_heights(p_arr,tri)
             u = thickn[k,:]
             z = u.reshape(n,n)
-            print(type(z[32][:]))
-            print(type(z[33][32]),z[32][32])
-            #np.savetxt("debug" + str(k) + ".csv", z, delimiter=",")
             
         thickness_mat = np.nanmax(thickn, axis=0)-np.nanmin(thickn, axis=0)
         if o.deformation:
@@ -86,6 +80,8 @@ def calc_thickness_matrix(objects,n,dxdt=0,dydt=0,pixel_size=1):       #n is sca
             thick_array += thickness_mat            #Temporary for testing deformations
         else:
             thick_array += thickness_mat
+    where_are_NaNs = np.isnan(thick_array)
+    thick_array[where_are_NaNs] = 0
     j = -np.sort(-thick_array)
     t_mat = thick_array.reshape(n,n)
     return t_mat
@@ -132,7 +128,7 @@ for g in range(1):
     cube = cuboid.cuboid("cmj",False,0,0,0,0,0,0,xRange,yRange,64,64,64)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
     #objects = [cube]
-    objects=[]
+    objects=[cube]
     
     '''
     if len(sys.argv) > 1:
