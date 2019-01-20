@@ -75,13 +75,12 @@ def calc_thickness_matrix(objects,n,dxdt=0,dydt=0,pixel_size=1):       #n is sca
             z = u.reshape(n,n)
             
         thickness_mat = np.nanmax(thickn, axis=0)-np.nanmin(thickn, axis=0)
+        where_are_NaNs = np.isnan(thickness_mat)
+        thickness_mat[where_are_NaNs] = 0
         if o.deformation:
-            #thick_array -= thickness_mat        #if it is deformation, we minus the array
-            thick_array += thickness_mat            #Temporary for testing deformations
+            thick_array -= thickness_mat            #Temporary for testing deformations
         else:
             thick_array += thickness_mat
-    where_are_NaNs = np.isnan(thick_array)
-    thick_array[where_are_NaNs] = 0
     j = -np.sort(-thick_array)
     t_mat = thick_array.reshape(n,n)
     return t_mat
@@ -125,7 +124,7 @@ for g in range(1):
     gammaRand = np.random.randint(0,360)
 
 
-    cube = cuboid.cuboid("cmj",False,0,0,0,0,0,0,xRange,yRange,64,64,64)
+    cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,0,0,0,xRange,yRange,64,64,64)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
     #objects = [cube]
     objects=[cube]
@@ -151,7 +150,7 @@ for g in range(1):
 
     #The deformations are tripyr which are created in this loop
     for i in range(len(dA)):
-        deformation = tripyr.tripyr("xcl",True,0,0,0,0,0,0,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
+        deformation = tripyr.tripyr("xcl",True,alphaRand,betaRand,gammaRand,0,0,0,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
         objects.append(deformation)
 
     tSubZero = time.time()
@@ -162,14 +161,14 @@ for g in range(1):
 	#We can call the function once here as a preliminary, and call again during the loop?
 
 
-    flatBackground = 0              #Flat background from the carbon layer. For now background will scale with scale factor
+    flatBackground = 10              #Flat background from the carbon layer. For now background will scale with scale factor
     image = (calc_thickness_matrix(objects,n) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
-#image = scipy.ndimage.filters.gaussian_filter(image,sigma=2)
+    image = scipy.ndimage.filters.gaussian_filter(image,sigma=1)
 
     np.asmatrix(image)
     #Adding poisson noise
-#image = addPoissonNoise(image)
+    image = addPoissonNoise(image)
     plt.figure(figsize=(5,5))
     
     plt.pcolormesh(xRange, yRange, image, cmap="gray")
