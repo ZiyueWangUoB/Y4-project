@@ -14,8 +14,8 @@ from pyquaternion import Quaternion
 
 
 class cuboid(object.objectType):
-    def __init__(self,material,deformation,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange,a,b,c):      #xPos,yPos,zPos all refer to the centre of the object
-        super().__init__(material,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange)
+    def __init__(self,material,deformation,randomQuarternion,xPos,yPos,zPos,xProbeRange,yProbeRange,a,b,c):      #xPos,yPos,zPos all refer to the centre of the object
+        super().__init__(material,randomQuarternion,xPos,yPos,zPos,xProbeRange,yProbeRange)
         self.deformation = deformation
         self.a = a		#a b c are length scales of a cuboid, arbitary
         self.b = b
@@ -60,21 +60,11 @@ class cuboid(object.objectType):
      
     
     def rotateCorners(self,xPos,yPos,zPos):
-        #print(('this is gamma') + str(self.gamma))
-        #Rotating corners also rotates the axis!
-        #Need "Euler angles" - Phi will be greater if theta is greater e.t.c.
-        centre = [xPos,yPos,zPos]
-        alphaQuaternion = Quaternion(axis= self.yAxis, angle = self.alpha*math.pi/180)               #bare in mind rotations in y is inverted to what we think - refer to notebook. X and z axis rotation is same as in diagrams
-        self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'y',self.alpha)
-        betaQuaternion = Quaternion(axis=self.xAxis, angle = self.beta*math.pi/180)
-        self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'x',self.beta)
-        gammaQuaternion = Quaternion(axis=self.zAxis, angle = self.gamma*math.pi/180)
-        self.findAxis(centre,self.xAxis,self.yAxis,self.zAxis,'z',self.gamma)
+        
         
         #Needs to rotate the axis after each rotation, otherwise it won't work! 
-        totalRotationQuaternion = alphaQuaternion*betaQuaternion*gammaQuaternion
-        
-        corn = self.corners         #Remove later if it's fine
+        totalRotationQuaternion = self.randomQuarternion       #Should generate a random uniform quaternion across the rotation space
+        corn = self.corners
         
         for x in range(len(self.corners)):
             self.corners[x] -= [self.xPos, self.yPos, self.zPos]

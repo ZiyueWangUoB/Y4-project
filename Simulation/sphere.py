@@ -10,8 +10,8 @@ import numpy as np
 import math
 
 class sphere(object.objectType):
-    def __init__(self,material,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange,r):
-        super().__init__(material,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange)		#Consider removing the angles since sphere doesn't tilt - may be a waste of memory
+    def __init__(self,material,randomQuarternion,xPos,yPos,zPos,xProbeRange,yProbeRange,r):
+        super().__init__(material,randomQuarternion,xPos,yPos,zPos,xProbeRange,yProbeRange)		#Consider removing the angles since sphere doesn't tilt - may be a waste of memory
         self.r = r		#radius
         self.thicknessMatrix = self.calcThicknessMatrix()
         
