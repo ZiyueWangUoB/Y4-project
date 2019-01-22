@@ -139,7 +139,12 @@ for g in range(1):
     '''
     #Alternate method for randomly generating three corners
     if len(sys.argv) > 1:
-        deformTheseCornersResult = random.sample(range(0,8),int(sys.argv[2]))
+        if int(sys.argv[2]) == 9:
+
+            rand_int = random.randint(1,8)
+            deformTheseCornersResult = random.sample(range(0,8),rand_int)
+        else:
+            deformTheseCornersResult = random.sample(range(0,8),int(sys.argv[2]))
         #print(deformTheseCornersResult)
     else:
         deformTheseCornersResult = []
@@ -161,7 +166,7 @@ for g in range(1):
 	#We can call the function once here as a preliminary, and call again during the loop?
 
 
-    flatBackground = 10              #Flat background from the carbon layer. For now background will scale with scale factor
+    flatBackground = 20              #Flat background from the carbon layer. For now background will scale with scale factor
     image = (calc_thickness_matrix(objects,n) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
     image = scipy.ndimage.filters.gaussian_filter(image,sigma=1)
@@ -179,8 +184,9 @@ for g in range(1):
     #print(time.time()-t0)
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    plt.imsave('/home/z/Documents/128ImagesBasic/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
-    #plt.savefig('~/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
+    #plt.imsave('/home/z/Documents/128ImagesBasic/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    plt.imsave(str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    # plt.savefig('~/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
     #plt.close()
 
 
