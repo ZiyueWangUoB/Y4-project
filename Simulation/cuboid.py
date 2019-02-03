@@ -64,6 +64,7 @@ class cuboid(object.objectType):
         
         #Needs to rotate the axis after each rotation, otherwise it won't work! 
         totalRotationQuaternion = self.randomQuarternion       #Should generate a random uniform quaternion across the rotation space
+        print(self.randomQuarternion)
         corn = self.corners
         
         for x in range(len(self.corners)):

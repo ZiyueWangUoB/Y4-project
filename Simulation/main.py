@@ -56,12 +56,19 @@ def intersect_heights(p_arr, tri):
     return h
 
 
-def calc_thickness_matrix(objects,n,dxdt=0,dydt=0,pixel_size=1):       #n is scan points, a is pixel size
+def calc_thickness_matrix(objects,n,dxdt=5e-4,dydt=5e-4,pixel_size=1):       #n is scan points, a is pixel size
     a = np.arange(0,n)-n//2
     x,y = np.meshgrid(a*pixel_size, a*pixel_size)
+    print(x)
+    print(y)
     if dxdt != 0 or dydt != 0:
-        t = np.arrange(x.size)
-        p_arr = np.stack([x.flatten() + t*dxdt, y.flatten() + t*dydt, np.zeros(n*n)]).T
+        t = np.arange(x.size)
+        new_x = x.flatten() + t*dxdt
+        y_mat = x.flatten() + t*dydt
+        y_mat_transpose = y_mat.reshape(n,n).T
+        new_y = y_mat_transpose.flatten()
+        
+        p_arr = np.stack([new_x, new_y, np.zeros(n*n)]).T
     else:
         p_arr = np.stack([x.flatten(),y.flatten(),np.zeros(n*n)]).T
     #This takes all the pixels and displays the x,y,z locations as tuples. By definition, it's a 16384x3 matrix. Each of the pixels (16384) contains it's x, y and z coordinates.
@@ -122,7 +129,6 @@ for g in range(1):
 
     randomQuarternion = Quaternion.random()
 
-
     cube = cuboid.cuboid("cmj",False,randomQuarternion,xPosRandom,yPosRandom,0,xRange,yRange,aRand,bRand,cRand)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
     #objects = [cube]
@@ -168,7 +174,8 @@ for g in range(1):
     flatBackground = 20              #Flat background from the carbon layer. For now background will scale with scale factor
     image = (calc_thickness_matrix(objects,n) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
-    image = scipy.ndimage.filters.gaussian_filter(image,sigma=1)
+    gauss_blur = 1
+    image = scipy.ndimage.filters.gaussian_filter(image,sigma=gauss_blur)
 
     np.asmatrix(image)
     #Adding poisson noise
@@ -179,7 +186,7 @@ for g in range(1):
 #print(image[34][34]-image[33][33])
 #np.savetxt("debug.csv", image, delimiter=",")
 
-    plt.show()
+    #plt.show()
     #print(time.time()-t0)
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
@@ -188,4 +195,22 @@ for g in range(1):
     # plt.savefig('~/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
     #plt.close()
 
+	#Code for second image, bimodal
+    newQuaternion = Quaternion.random()
+    print(newQuaternion)
+    for i in range(len(objects)):
+        objects[i].randomQuarternion = newQuaternion
+        objects[i].doRotation()
 
+    image2 = (calc_thickness_matrix(objects,n) + flatBackground)
+    image2 = scipy.ndimage.filters.gaussian_filter(image2,sigma=gauss_blur)
+    np.asmatrix(image2)
+    image2 = addPoissonNoise(image2)
+    plt.figure(figsize=(5,5))
+    plt.pcolormesh(xRange, yRange, image2, cmap="gray")
+    plt.show()
+
+
+
+
+	
