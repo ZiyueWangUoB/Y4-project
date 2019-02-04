@@ -45,7 +45,6 @@ def intersect_heights(p_arr,tri,r_arr):
     d = r_arr         #This is the ray from the beam
     b = np.inner(norm,d)            #b==0 means n o intersection
     if b[0] == 0:
-        print(norm)
     g = p_arr-v0            #Vector from every pixel to the vertex v0
     a = np.inner(norm,g)        #a factor
     h = -a/b
@@ -188,7 +187,7 @@ for g in range(1):
 
 
     flatBackground = 20              #Flat background from the carbon layer. For now background will scale with scale factor
-    image = (calc_thickness_matrix(objects,n,0,0,0.5,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
+    image = (calc_thickness_matrix(objects,n,0,0,0,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
     gauss_blur = 1
     image = scipy.ndimage.filters.gaussian_filter(image,sigma=gauss_blur)
@@ -206,28 +205,26 @@ for g in range(1):
     #print(time.time()-t0)
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    #plt.imsave('/home/z/Documents/128ImagesBasic/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    plt.imsave('/home/z/Documents/128ImagesBasicA/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
     #plt.imsave(str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
     # plt.savefig('~/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
     #plt.close()
 
-    '''
+    
 	#Code for second image, bimodal
     newQuaternion = Quaternion.random()
-    print(newQuaternion)
     for i in range(len(objects)):
         objects[i].randomQuarternion = newQuaternion
         objects[i].doRotation()
 
-    image2 = (calc_thickness_matrix(objects,n,dxdt=0,dydt=0,dxdr=0,dydr=0) + flatBackground)
+    image2 = (calc_thickness_matrix(objects,n,0,0,0,0) + flatBackground)
     image2 = scipy.ndimage.filters.gaussian_filter(image2,sigma=gauss_blur)
     np.asmatrix(image2)
     image2 = addPoissonNoise(image2)
     plt.figure(figsize=(5,5))
     plt.pcolormesh(xRange, yRange, image2, cmap="gray")
-    plt.show()
+    plt.imsave('/home/z/Documents/128ImagesBasicB/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
 
-'''
 
 
 	
