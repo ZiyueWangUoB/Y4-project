@@ -44,6 +44,8 @@ def intersect_heights(p_arr,tri,r_arr):
     v = v2-v0
     d = r_arr         #This is the ray from the beam
     b = np.inner(norm,d)            #b==0 means n o intersection
+    if b[0] == 0:
+        print(norm)
     g = p_arr-v0            #Vector from every pixel to the vertex v0
     a = np.inner(norm,g)        #a factor
     h = -a/b
@@ -77,10 +79,10 @@ def calc_thickness_matrix(objects,n,dxdt,dydt,dxdr,dydr,pixel_size=1):       #n 
         new_yr = yr + dydr
         yr_mat_t = new_yr.reshape(n,n).T
         new_yr = yr_mat_t.flatten()
-        r_arr = np.stack([new_xr,new_yr,np.ones(n*n)]).T
+        r_arr = np.stack([new_xr,new_yr,np.zeros(n*n)]).T
         r_arr_sum = np.array([r_arr[:,0]**2+r_arr[:,1]**2+r_arr[:,2]**2]).T
         r_arr_new = r_arr/r_arr_sum
-        #r_arr = r_arr_new
+        r_arr = r_arr_new
     else:
         r_arr = np.stack([xr.flatten(),yr.flatten(),np.ones(n*n)]).T
 
@@ -141,7 +143,7 @@ for g in range(1):
     #sphere.calcThicknessMatrix()
 
     randomQuarternion = Quaternion.random()
-    randomQuarternion = Quaternion(1,0,0,0)
+    #randomQuarternion = Quaternion(1,0,0,0)
 
     cube = cuboid.cuboid("cmj",False,randomQuarternion,xPosRandom,yPosRandom,0,xRange,yRange,aRand,bRand,cRand)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
@@ -186,7 +188,7 @@ for g in range(1):
 
 
     flatBackground = 20              #Flat background from the carbon layer. For now background will scale with scale factor
-    image = (calc_thickness_matrix(objects,n,0,0,1,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
+    image = (calc_thickness_matrix(objects,n,0,0,0.5,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
     gauss_blur = 1
     image = scipy.ndimage.filters.gaussian_filter(image,sigma=gauss_blur)
@@ -209,6 +211,7 @@ for g in range(1):
     # plt.savefig('~/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
     #plt.close()
 
+    '''
 	#Code for second image, bimodal
     newQuaternion = Quaternion.random()
     print(newQuaternion)
@@ -224,7 +227,7 @@ for g in range(1):
     plt.pcolormesh(xRange, yRange, image2, cmap="gray")
     plt.show()
 
-
+'''
 
 
 	
