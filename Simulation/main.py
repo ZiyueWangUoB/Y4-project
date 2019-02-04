@@ -38,11 +38,11 @@ def findMaxAndMin(mainObject):
     maxY = np.amax(newArray[1])
     return [(minX,maxX), (minY,maxY)]
 
-def intersect_heights(p_arr, tri):
+def intersect_heights(p_arr,tri,r_arr):
     norm,v0,v1,v2 = tri
     u = v1-v0
     v = v2-v0
-    d = np.array([[0,0,1]])           #This is the ray from the beam
+    d = r_arr         #This is the ray from the beam
     b = np.inner(norm,d)            #b==0 means n o intersection
     g = p_arr-v0            #Vector from every pixel to the vertex v0
     a = np.inner(norm,g)        #a factor
@@ -56,21 +56,34 @@ def intersect_heights(p_arr, tri):
     return h
 
 
-def calc_thickness_matrix(objects,n,dxdt=5e-4,dydt=5e-4,pixel_size=1):       #n is scan points, a is pixel size
+def calc_thickness_matrix(objects,n,dxdt,dydt,dxdr,dydr,pixel_size=1):       #n is scan points, a is pixel size
     a = np.arange(0,n)-n//2
     x,y = np.meshgrid(a*pixel_size, a*pixel_size)
-    print(x)
-    print(y)
+    xr = np.zeros(n*n)
+    yr = np.zeros(n*n)
     if dxdt != 0 or dydt != 0:
         t = np.arange(x.size)
         new_x = x.flatten() + t*dxdt
         y_mat = x.flatten() + t*dydt
         y_mat_transpose = y_mat.reshape(n,n).T
         new_y = y_mat_transpose.flatten()
-        
         p_arr = np.stack([new_x, new_y, np.zeros(n*n)]).T
     else:
         p_arr = np.stack([x.flatten(),y.flatten(),np.zeros(n*n)]).T
+
+    if dxdr != 0 or dydr != 0:
+        tr = np.arange(xr.size)
+        new_xr = xr + dxdr
+        new_yr = yr + dydr
+        yr_mat_t = new_yr.reshape(n,n).T
+        new_yr = yr_mat_t.flatten()
+        r_arr = np.stack([new_xr,new_yr,np.ones(n*n)]).T
+        r_arr_sum = np.array([r_arr[:,0]**2+r_arr[:,1]**2+r_arr[:,2]**2]).T
+        r_arr_new = r_arr/r_arr_sum
+        #r_arr = r_arr_new
+    else:
+        r_arr = np.stack([xr.flatten(),yr.flatten(),np.ones(n*n)]).T
+
     #This takes all the pixels and displays the x,y,z locations as tuples. By definition, it's a 16384x3 matrix. Each of the pixels (16384) contains it's x, y and z coordinates.
     thick_array = np.zeros(p_arr.shape[0])
     for o in objects:       #for each of the individual objects
@@ -78,7 +91,7 @@ def calc_thickness_matrix(objects,n,dxdt=5e-4,dydt=5e-4,pixel_size=1):       #n 
         thickn = np.zeros((len(planes),p_arr.shape[0]))
         for k, tri in enumerate(planes):         #k is the iterator, t is the element within objects
             #print(tri)
-            thickn[k,:] = intersect_heights(p_arr,tri)
+            thickn[k,:] = intersect_heights(p_arr,tri,r_arr)
             u = thickn[k,:]
             z = u.reshape(n,n)
             
@@ -128,6 +141,7 @@ for g in range(1):
     #sphere.calcThicknessMatrix()
 
     randomQuarternion = Quaternion.random()
+    randomQuarternion = Quaternion(1,0,0,0)
 
     cube = cuboid.cuboid("cmj",False,randomQuarternion,xPosRandom,yPosRandom,0,xRange,yRange,aRand,bRand,cRand)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
@@ -172,7 +186,7 @@ for g in range(1):
 
 
     flatBackground = 20              #Flat background from the carbon layer. For now background will scale with scale factor
-    image = (calc_thickness_matrix(objects,n) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
+    image = (calc_thickness_matrix(objects,n,0,0,1,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
     gauss_blur = 1
     image = scipy.ndimage.filters.gaussian_filter(image,sigma=gauss_blur)
@@ -202,7 +216,7 @@ for g in range(1):
         objects[i].randomQuarternion = newQuaternion
         objects[i].doRotation()
 
-    image2 = (calc_thickness_matrix(objects,n) + flatBackground)
+    image2 = (calc_thickness_matrix(objects,n,dxdt=0,dydt=0,dxdr=0,dydr=0) + flatBackground)
     image2 = scipy.ndimage.filters.gaussian_filter(image2,sigma=gauss_blur)
     np.asmatrix(image2)
     image2 = addPoissonNoise(image2)
