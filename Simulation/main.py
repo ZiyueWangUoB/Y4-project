@@ -184,11 +184,16 @@ for g in range(1):
 	#Need to use function to find the optimal area for the probe to operate. Does this interfere with the rotations while moving? If so how to fix. 
 	#We can call the function once here as a preliminary, and call again during the loop?
 
+    
 
-    flatBackground = 10              #Flat background from the carbon layer. For now background will scale with scale factor
+    flatBackground = np.random.randint(5,15)
+
+    #flatBackground = 10              #Flat background from the carbon layer. For now background will scale with scale factor
     image = (calc_thickness_matrix(objects,n,0,0,0,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
-    gauss_blur = 1
+    gauss_blur = np.random.uniform(0.5,1.5)
+    
+    #gauss_blur = 1
     image = scipy.ndimage.filters.gaussian_filter(image,sigma=gauss_blur)
 
     np.asmatrix(image)
