@@ -44,7 +44,6 @@ def intersect_heights(p_arr,tri,r_arr):
     v = v2-v0
     d = r_arr         #This is the ray from the beam
     b = np.inner(norm,d)            #b==0 means n o intersection
-    if b[0] == 0:
     g = p_arr-v0            #Vector from every pixel to the vertex v0
     a = np.inner(norm,g)        #a factor
     h = -a/b
@@ -186,7 +185,7 @@ for g in range(1):
 	#We can call the function once here as a preliminary, and call again during the loop?
 
 
-    flatBackground = 20              #Flat background from the carbon layer. For now background will scale with scale factor
+    flatBackground = 10              #Flat background from the carbon layer. For now background will scale with scale factor
     image = (calc_thickness_matrix(objects,n,0,0,0,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
     gauss_blur = 1
@@ -223,7 +222,7 @@ for g in range(1):
     image2 = addPoissonNoise(image2)
     plt.figure(figsize=(5,5))
     plt.pcolormesh(xRange, yRange, image2, cmap="gray")
-    plt.imsave('/home/z/Documents/128ImagesBasicB/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    plt.imsave('/home/z/Documents/128ImagesBasicB/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image2,format='jpg',cmap = 'gray')
 
 
 
