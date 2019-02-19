@@ -186,16 +186,16 @@ for g in range(1):
 
     
 
-    flatBackground = np.random.randint(5,15)
+    flatBackground = np.random.randint(15,30)
 
-    dx = np.random.uniform(5e-4,1e-4)
-    dy = np.random.uniform(5e-4,1e-4)
+    dx = np.random.uniform(5e-4,1e-3)
+    dy = np.random.uniform(5e-4,1e-3)
 
 
     #flatBackground = 10              #Flat background from the carbon layer. For now background will scale with scale factor
     image = (calc_thickness_matrix(objects,n,dx,dy,0,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
-    gauss_blur = np.random.uniform(0.5,1.5)
+    gauss_blur = np.random.uniform(1.5,3)
     
     #gauss_blur = 1
     image = scipy.ndimage.filters.gaussian_filter(image,sigma=gauss_blur)
@@ -213,12 +213,11 @@ for g in range(1):
     #print(time.time()-t0)
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    plt.imsave('/home/z/Documents/128ImagesBasicA/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
-    #plt.imsave(str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
-    # plt.savefig('~/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
+    #plt.imsave('/home/z/Documents/128ImagesBasicA/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    plt.imsave('/home/z/Documents/test/noisy/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray') 
     #plt.close()
 
-    
+    '''    
 	#Code for second image, bimodal
     UpQuaternion = Quaternion(axis=[0,1,0], angle=5*math.pi/180)
     for i in range(len(objects)):
@@ -249,4 +248,4 @@ for g in range(1):
     #plt.show()
 
 
-	
+    '''	
