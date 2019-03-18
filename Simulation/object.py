@@ -13,11 +13,9 @@ from pyquaternion import Quaternion
 
 class objectType:
 	#Alpha Beta Gamma are the tilts or angles to the x,y,z planes respectively.
-    def __init__(self,material,alpha,beta,gamma,xPos,yPos,zPos,xProbeRange,yProbeRange):
+    def __init__(self,material,randomQuarternion,xPos,yPos,zPos,xProbeRange,yProbeRange):
         self.material = material
-        self.alpha = alpha
-        self.beta = beta
-        self.gamma = gamma
+        self.randomQuarternion = randomQuarternion
         self.xPos = xPos
         self.yPos = yPos
         self.zPos = zPos
@@ -79,31 +77,6 @@ class objectType:
             return True
         elif second <= 0:
             return False
-        
-    def findAxis(self,centre,xAxis,yAxis,zAxis,axisAround,ang):
-        xAxis -= centre
-        yAxis -= centre
-        zAxis -= centre
-        if axisAround is 'y':
-            rotateQuaternion = Quaternion(axis = yAxis, angle = ang*math.pi/180)
-            xAxis = rotateQuaternion.rotate(xAxis) 
-            zAxis = rotateQuaternion.rotate(zAxis)
-        elif axisAround is 'x':
-            rotateQuaternion = Quaternion(axis = xAxis, angle = ang*math.pi/180)
-            yAxis = rotateQuaternion.rotate(yAxis)
-            zAxis = rotateQuaternion.rotate(zAxis)
-        elif axisAround is 'z':
-            rotateQuaternion = Quaternion(axis = zAxis, angle = ang*math.pi/180)
-            xAxis = rotateQuaternion.rotate(xAxis)
-            yAxis = rotateQuaternion.rotate(yAxis)
-        
-        xAxis += centre
-        yAxis += centre
-        zAxis += centre
-        self.xAxis = xAxis
-        self.yAxis = yAxis
-        self.zAxis = zAxis
-        
         
 
 #def findRegion(self)

@@ -13,6 +13,7 @@ import sphere
 import addDeformation as aD
 import sys
 import random
+from pyquaternion import Quaternion
 
 sf = 1
 
@@ -37,11 +38,11 @@ def findMaxAndMin(mainObject):
     maxY = np.amax(newArray[1])
     return [(minX,maxX), (minY,maxY)]
 
-def intersect_heights(p_arr, tri):
+def intersect_heights(p_arr,tri,r_arr):
     norm,v0,v1,v2 = tri
     u = v1-v0
     v = v2-v0
-    d = np.array([[0,0,1]])           #This is the ray from the beam
+    d = r_arr         #This is the ray from the beam
     b = np.inner(norm,d)            #b==0 means n o intersection
     g = p_arr-v0            #Vector from every pixel to the vertex v0
     a = np.inner(norm,g)        #a factor
@@ -55,14 +56,34 @@ def intersect_heights(p_arr, tri):
     return h
 
 
-def calc_thickness_matrix(objects,n,dxdt=0,dydt=0,pixel_size=1):       #n is scan points, a is pixel size
+def calc_thickness_matrix(objects,n,dxdt,dydt,dxdr,dydr,pixel_size=1):       #n is scan points, a is pixel size
     a = np.arange(0,n)-n//2
     x,y = np.meshgrid(a*pixel_size, a*pixel_size)
+    xr = np.zeros(n*n)
+    yr = np.zeros(n*n)
     if dxdt != 0 or dydt != 0:
-        t = np.arrange(x.size)
-        p_arr = np.stack([x.flatten() + t*dxdt, y.flatten() + t*dydt, np.zeros(n*n)]).T
+        t = np.arange(x.size)
+        new_x = x.flatten() + t*dxdt
+        y_mat = x.flatten() + t*dydt
+        y_mat_transpose = y_mat.reshape(n,n).T
+        new_y = y_mat_transpose.flatten()
+        p_arr = np.stack([new_x, new_y, np.zeros(n*n)]).T
     else:
         p_arr = np.stack([x.flatten(),y.flatten(),np.zeros(n*n)]).T
+
+    if dxdr != 0 or dydr != 0:
+        tr = np.arange(xr.size)
+        new_xr = xr + dxdr
+        new_yr = yr + dydr
+        yr_mat_t = new_yr.reshape(n,n).T
+        new_yr = yr_mat_t.flatten()
+        r_arr = np.stack([new_xr,new_yr,np.zeros(n*n)]).T
+        r_arr_sum = np.array([r_arr[:,0]**2+r_arr[:,1]**2+r_arr[:,2]**2]).T
+        r_arr_new = r_arr/r_arr_sum
+        r_arr = r_arr_new
+    else:
+        r_arr = np.stack([xr.flatten(),yr.flatten(),np.ones(n*n)]).T
+
     #This takes all the pixels and displays the x,y,z locations as tuples. By definition, it's a 16384x3 matrix. Each of the pixels (16384) contains it's x, y and z coordinates.
     thick_array = np.zeros(p_arr.shape[0])
     for o in objects:       #for each of the individual objects
@@ -70,7 +91,7 @@ def calc_thickness_matrix(objects,n,dxdt=0,dydt=0,pixel_size=1):       #n is sca
         thickn = np.zeros((len(planes),p_arr.shape[0]))
         for k, tri in enumerate(planes):         #k is the iterator, t is the element within objects
             #print(tri)
-            thickn[k,:] = intersect_heights(p_arr,tri)
+            thickn[k,:] = intersect_heights(p_arr,tri,r_arr)
             u = thickn[k,:]
             z = u.reshape(n,n)
             
@@ -119,12 +140,10 @@ for g in range(1):
 
     #sphere.calcThicknessMatrix()
 
-    alphaRand = np.random.randint(0,360)
-    betaRand = np.random.randint(0,360)
-    gammaRand = np.random.randint(0,360)
+    #randomQuarternion = Quaternion.random()
+    randomQuarternion = Quaternion(1,0,0,0)
 
-
-    cube = cuboid.cuboid("cmj",False,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,0,xRange,yRange,aRand,bRand,cRand)
+    cube = cuboid.cuboid("cmj",False,randomQuarternion,xPosRandom,yPosRandom,0,xRange,yRange,aRand,bRand,cRand)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
     #objects = [cube]
     objects=[cube]
@@ -155,7 +174,7 @@ for g in range(1):
 
     #The deformations are tripyr which are created in this loop
     for i in range(len(dA)):
-        deformation = tripyr.tripyr("xcl",True,alphaRand,betaRand,gammaRand,xPosRandom,yPosRandom,0,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
+        deformation = tripyr.tripyr("xcl",True,randomQuarternion,xPosRandom,yPosRandom,0,xRange,yRange,dA[i][0],dA[i][1],dA[i][2],dA[i][3],cube.xAxis,cube.yAxis,cube.zAxis)
         objects.append(deformation)
 
     tSubZero = time.time()
@@ -165,28 +184,75 @@ for g in range(1):
 	#Need to use function to find the optimal area for the probe to operate. Does this interfere with the rotations while moving? If so how to fix. 
 	#We can call the function once here as a preliminary, and call again during the loop?
 
+    
 
-    flatBackground = 20              #Flat background from the carbon layer. For now background will scale with scale factor
-    image = (calc_thickness_matrix(objects,n) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
+    flatBackground = np.random.randint(15,30)
+
+	#flatBackground = 0
+    #dx = np.random.uniform(5e-4,1e-3)
+    #dy = np.random.uniform(5e-4,1e-3)
+    dx = 1e-4
+    dy = 1e-4
+	
+
+    #flatBackground = 10              #Flat background from the carbon layer. For now background will scale with scale factor
+    image = (calc_thickness_matrix(objects,n,dx,dy,0,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
-    image = scipy.ndimage.filters.gaussian_filter(image,sigma=1)
+    gauss_blur = np.random.uniform(1.5,3)
+    
+    #gauss_blur = 1
+    image = scipy.ndimage.filters.gaussian_filter(image,sigma=gauss_blur)
 
     np.asmatrix(image)
     #Adding poisson noise
     image = addPoissonNoise(image)
     plt.figure(figsize=(5,5))
-    
-    plt.pcolormesh(xRange, yRange, image, cmap="gray")
+
+    plt.imshow(image,cmap='gray')
+#plt.pcolormesh(xRange, yRange, image, cmap="gray")
 #print(image[34][34]-image[33][33])
 #np.savetxt("debug.csv", image, delimiter=",")
 
-    #plt.show()
+    plt.show()
     #print(time.time()-t0)
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    #plt.imsave('/home/z/Documents/128ImagesBasic/' + str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
-    plt.imsave(str(sys.argv[3]) + '/test' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
-    # plt.savefig('~/Users/ziyuewang/Documents/Y4\ project/Presentations/rotate' + str(sys.argv[3]) + '.jpg')
+    #plt.imsave('/home/z/Documents/128ImagesBasicA/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    #plt.imsave('/home/z/Documents/test/noisy/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray') 
     #plt.close()
+	
+
+	
 
 
+    '''    
+	#Code for second image, bimodal
+    UpQuaternion = Quaternion(axis=[0,1,0], angle=5*math.pi/180)
+    for i in range(len(objects)):
+        objects[i].randomQuarternion = UpQuaternion
+        objects[i].doRotation()
+
+    image2 = (calc_thickness_matrix(objects,n,dx,dy,0,0) + flatBackground)
+    image2 = scipy.ndimage.filters.gaussian_filter(image2,sigma=gauss_blur)
+    np.asmatrix(image2)
+    image2 = addPoissonNoise(image2)
+    plt.figure(figsize=(5,5))
+    plt.pcolormesh(xRange, yRange, image2, cmap="gray")
+    plt.imsave('/home/z/Documents/128ImagesBasicB/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image2,format='jpg',cmap = 'gray')
+
+
+    DownQuaternion = Quaternion(axis=[0,1,0],angle=-5*math.pi/180)
+    for i in range(len(objects)):
+        objects[i].randomQuarternion = DownQuaternion
+        objects[i].doRotation()
+
+    image2 = (calc_thickness_matrix(objects,n,dx,dy,0,0) + flatBackground)
+    image2 = scipy.ndimage.filters.gaussian_filter(image2,sigma=gauss_blur)
+    np.asmatrix(image2)
+    image2 = addPoissonNoise(image2)
+    plt.figure(figsize=(5,5))
+    plt.pcolormesh(xRange, yRange, image2, cmap="gray")
+    plt.imsave('/home/z/Documents/128ImagesBasicC/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image2,format='jpg',cmap = 'gray')
+    #plt.show()
+
+    '''	
