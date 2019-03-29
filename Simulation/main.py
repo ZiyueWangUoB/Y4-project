@@ -158,8 +158,8 @@ for g in range(1):
 
     #sphere.calcThicknessMatrix()
 
-    randomQuarternion = Quaternion.random()
-    #randomQuarternion = Quaternion(1,0,0,0)
+    #randomQuarternion = Quaternion.random()
+    randomQuarternion = Quaternion(1,0,0,0)
 
     cube = cuboid.cuboid("cmj",False,randomQuarternion,xPosRandom,yPosRandom,0,xRange,yRange,aRand,bRand,cRand)
     #cube = cuboid.cuboid("cmj",False,0,0,0,50,50,50,xRange,yRange,30,35,40)
@@ -204,6 +204,7 @@ for g in range(1):
 
     
 
+<<<<<<< HEAD
     flatBackground = np.random.randint(45,60)
 
     #flatBackground = 0
@@ -212,6 +213,16 @@ for g in range(1):
     
     #dx = 0
     #dy = 0
+=======
+    flatBackground = np.random.randint(15,30)
+
+	#flatBackground = 0
+    #dx = np.random.uniform(5e-4,1e-3)
+    #dy = np.random.uniform(5e-4,1e-3)
+    dx = 1e-4
+    dy = 1e-4
+	
+>>>>>>> 9d5e5d1e299c15cbed8406696dd16d26eed6d62a
 
     #flatBackground = 10              #Flat background from the carbon layer. For now background will scale with scale factor
     image = (calc_thickness_matrix(objects,n,dx,dy,0,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
@@ -225,15 +236,22 @@ for g in range(1):
     #Adding poisson noise
     image = addPoissonNoise(image)
     plt.figure(figsize=(5,5))
+<<<<<<< HEAD
     
     #plt.pcolormesh(xRange, yRange, image, cmap="gray")
+=======
+
+    plt.imshow(image,cmap='gray')
+#plt.pcolormesh(xRange, yRange, image, cmap="gray")
+>>>>>>> 9d5e5d1e299c15cbed8406696dd16d26eed6d62a
 #print(image[34][34]-image[33][33])
 #np.savetxt("debug.csv", image, delimiter=",")
 
-    #plt.show()
+    plt.show()
     #print(time.time()-t0)
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
+<<<<<<< HEAD
     #plt.imsave('/home/z/Documents/train/noisy/A/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
     plt.imsave('/home/z/Documents/test/noisy/A/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray') 
     #plt.close()
@@ -245,6 +263,15 @@ for g in range(1):
      
         
     '''
+=======
+    #plt.imsave('/home/z/Documents/128ImagesBasicA/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    #plt.imsave('/home/z/Documents/test/noisy/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray') 
+    #plt.close()
+	
+
+	
+
+>>>>>>> 9d5e5d1e299c15cbed8406696dd16d26eed6d62a
 
         
 	#Code for second image, bimodal
@@ -284,5 +311,9 @@ for g in range(1):
     #plt.imsave('/home/z/Documents/128ImagesDiff/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',img,format='jpg',cmap = 'gray')
     #lt.show()
 
+<<<<<<< HEAD
 
     '''
+=======
+    '''	
+>>>>>>> 9d5e5d1e299c15cbed8406696dd16d26eed6d62a

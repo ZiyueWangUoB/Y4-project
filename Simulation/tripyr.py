@@ -48,6 +48,7 @@ class tripyr(object.objectType):
         p4 = self.findPlane(corners[0],corners[1],corners[2])
         return [p1,p2,p3,p4]
     
+	'''
     def findValidIntersection(self,plane,intersection):          #give u the singular plane, has the normal vector, 
         o1 = self.orient(intersection,plane[2],plane[1],plane[0])
         o2 = self.orient(intersection,plane[3],plane[2],plane[0])
@@ -63,7 +64,7 @@ class tripyr(object.objectType):
         else:
             #print("its false")
             return False
-
+	'''
         
         
         
