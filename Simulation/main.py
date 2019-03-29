@@ -107,6 +107,24 @@ def calc_thickness_matrix(objects,n,dxdt,dydt,dxdr,dydr,pixel_size=1):       #n 
     return t_mat
 
 
+def quaternion_to_euler(v, w):
+    x,y,z = v
+    t0 = +2.0 * (w * x + y * z)
+    t1 = +1.0 - 2.0 * (x * x + y * y)
+    X = math.degrees(math.atan2(t0, t1))
+
+    t2 = +2.0 * (w * y - z * x)
+    t2 = +1.0 if t2 > +1.0 else t2
+    t2 = -1.0 if t2 < -1.0 else t2
+    Y = math.degrees(math.asin(t2))
+
+    t3 = +2.0 * (w * z + x * y)
+    t4 = +1.0 - 2.0 * (y * y + z * z)
+    Z = math.degrees(math.atan2(t3, t4))
+
+    return X, Y, Z
+
+
 
 
 
@@ -164,7 +182,7 @@ for g in range(1):
             deformTheseCornersResult = random.sample(range(0,8),rand_int)
         else:
             deformTheseCornersResult = random.sample(range(0,8),int(sys.argv[2]))
-        #print(deformTheseCornersResult)
+        print(deformTheseCornersResult)
     else:
         deformTheseCornersResult = []
 
@@ -186,26 +204,29 @@ for g in range(1):
 
     
 
-    flatBackground = np.random.randint(15,30)
+    flatBackground = np.random.randint(45,60)
 
-    dx = np.random.uniform(5e-4,1e-3)
-    dy = np.random.uniform(5e-4,1e-3)
-
+    #flatBackground = 0
+    dx = np.random.uniform(-2e-4,2e-4)
+    dy = np.random.uniform(-2e-4,2e-4)
+    
+    #dx = 0
+    #dy = 0
 
     #flatBackground = 10              #Flat background from the carbon layer. For now background will scale with scale factor
     image = (calc_thickness_matrix(objects,n,dx,dy,0,0) + flatBackground)               #Flat background and image will all scale with N, the number of electrons (dose) hitting the atom column
     #Adding gaussian blur
-    gauss_blur = np.random.uniform(1.5,3)
+    gauss_blur = np.random.uniform(0.5,1.5)
     
     #gauss_blur = 1
     image = scipy.ndimage.filters.gaussian_filter(image,sigma=gauss_blur)
-
+    #print(np.shape(image))
     np.asmatrix(image)
     #Adding poisson noise
     image = addPoissonNoise(image)
     plt.figure(figsize=(5,5))
     
-    plt.pcolormesh(xRange, yRange, image, cmap="gray")
+    #plt.pcolormesh(xRange, yRange, image, cmap="gray")
 #print(image[34][34]-image[33][33])
 #np.savetxt("debug.csv", image, delimiter=",")
 
@@ -213,11 +234,19 @@ for g in range(1):
     #print(time.time()-t0)
     #plt.savefig('SimulationImages/Spheres/plot'+str(sys.argv[i])+'.png')     #sys.argv is the input from the bash script
     #plt.savefig('/home/z/Documents/pics/1deform/image' + str(sys.argv[1]) + '.png', bbox_inches='tight', pad_inches = 0)     #sys.argv is the input from the bash script made for 1deform on linux rn
-    #plt.imsave('/home/z/Documents/128ImagesBasicA/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
-    plt.imsave('/home/z/Documents/test/noisy/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray') 
+    #plt.imsave('/home/z/Documents/train/noisy/A/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    plt.imsave('/home/z/Documents/test/noisy/A/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray') 
     #plt.close()
+    
+    x,y,z = quaternion_to_euler(randomQuarternion.imaginary,randomQuarternion.real)
+    rot_mat = randomQuarternion.rotation_matrix
+    stats = np.array([rot_mat,flatBackground,gauss_blur,dx,dy])
+    np.save('/home/z/Documents/test/noisy/A/' + str(sys.argv[3]) + '/stats/' + str(sys.argv[1]) + 'rotMat.npy',stats)      #Saving the rotation matrix in a subfolder, each img with it's own matrix
+     
+        
+    '''
 
-    '''    
+        
 	#Code for second image, bimodal
     UpQuaternion = Quaternion(axis=[0,1,0], angle=5*math.pi/180)
     for i in range(len(objects)):
@@ -230,22 +259,30 @@ for g in range(1):
     image2 = addPoissonNoise(image2)
     plt.figure(figsize=(5,5))
     plt.pcolormesh(xRange, yRange, image2, cmap="gray")
-    plt.imsave('/home/z/Documents/128ImagesBasicB/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image2,format='jpg',cmap = 'gray')
-
-
+    #plt.imsave('/home/z/Documents/train/noisy/B/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image2,format='jpg',cmap = 'gray')
+    #plt.imsave('/home/z/Documents/test/noisy/B/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    
+    
     DownQuaternion = Quaternion(axis=[0,1,0],angle=-5*math.pi/180)
     for i in range(len(objects)):
         objects[i].randomQuarternion = DownQuaternion
         objects[i].doRotation()
 
-    image2 = (calc_thickness_matrix(objects,n,dx,dy,0,0) + flatBackground)
-    image2 = scipy.ndimage.filters.gaussian_filter(image2,sigma=gauss_blur)
-    np.asmatrix(image2)
-    image2 = addPoissonNoise(image2)
+    image3 = (calc_thickness_matrix(objects,n,dx,dy,0,0) + flatBackground)
+    image3 = scipy.ndimage.filters.gaussian_filter(image3,sigma=gauss_blur)
+    np.asmatrix(image3)
+    image3 = addPoissonNoise(image3)
     plt.figure(figsize=(5,5))
-    plt.pcolormesh(xRange, yRange, image2, cmap="gray")
-    plt.imsave('/home/z/Documents/128ImagesBasicC/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image2,format='jpg',cmap = 'gray')
-    #plt.show()
+    plt.pcolormesh(xRange, yRange, image3, cmap="gray")
+    #plt.imsave('/home/z/Documents/train/noisy/C/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image3,format='jpg',cmap = 'gray')
+    #plt.imsave('/home/z/Documents/test/noisy/C/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',image,format='jpg',cmap = 'gray')
+    
+    
+    #img =  image2 - image3
+    #plt.figure(figsize=(5,5))
+    #plt.pcolormesh(xRange,yRange,img,cmap="gray")
+    #plt.imsave('/home/z/Documents/128ImagesDiff/' + str(sys.argv[3]) + '/' + str(sys.argv[1]) + '.jpg',img,format='jpg',cmap = 'gray')
+    #lt.show()
 
 
-    '''	
+    '''
